@@ -8,28 +8,24 @@ import logging
 logging.basicConfig(format='%(filename)s:%(lineno)s:%(levelname)s -- %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# import the main streamlit library as well
-# as SideBarLinks function from src/modules folder
+# Streamlit and supporting libraries
 import streamlit as st
-from modules.nav import SideBarLinks
+import pandas as pd
+import requests
+import plotly.express as px
 
-# streamlit supports reguarl and wide layout (how the controls
-# are organized/displayed on the screen).
-st.set_page_config(layout = 'wide')
+# Streamlit layout config
+st.set_page_config(layout='wide')
 
-# If a user is at this page, we assume they are not 
-# authenticated.  So we change the 'authenticated' value
-# in the streamlit session_state to false. 
+# Assume user is unauthenticated at start
 st.session_state['authenticated'] = False
 
-# Use the SideBarLinks function from src/modules/nav.py to control
-# the links displayed on the left-side panel. 
-# IMPORTANT: ensure src/.streamlit/config.toml sets
-# showSidebarNavigation = false in the [client] section
+# Sidebar navigation setup
+from modules.nav import SideBarLinks
 SideBarLinks(show_home=True)
 
 # ***************************************************
-#    The major content of this page
+# LOGIN SECTION — your original code (kept exactly)
 # ***************************************************
 
 # set the title of the page and provide a simple prompt. 
@@ -47,15 +43,9 @@ st.write('#### HI! As which user would you like to log in?')
 if st.button("Act as John, a Political Strategy Advisor", 
             type = 'primary', 
             use_container_width=True):
-    # when user clicks the button, they are now considered authenticated
     st.session_state['authenticated'] = True
-    # we set the role of the current user
     st.session_state['role'] = 'pol_strat_advisor'
-    # we add the first name of the user (so it can be displayed on 
-    # subsequent pages). 
     st.session_state['first_name'] = 'John'
-    # finally, we ask streamlit to switch to another page, in this case, the 
-    # landing page for this particular user type
     logger.info("Logging in as Political Strategy Advisor Persona")
     st.switch_page('pages/00_Pol_Strat_Home.py')
 
@@ -75,5 +65,28 @@ if st.button('Act as System Administrator',
     st.session_state['first_name'] = 'SysAdmin'
     st.switch_page('pages/20_Admin_Home.py')
 
+# ***************************************************
+# GRAPH SECTION — new addition below login UI
+# ***************************************************
 
+st.divider()
+st.subheader("📊 Preview: MEP Loyalty Scoreboard")
 
+try:
+    response = requests.get("http://localhost:5001/loyalty")
+    response.raise_for_status()
+    data = response.json()
+
+    loyalty_df = pd.DataFrame(data["loyalty_scores"])
+
+    fig = px.bar(
+        loyalty_df.sort_values("Loyalty_Score", ascending=False),
+        x="MEP", y="Loyalty_Score", title="Loyalty to European Party (%)",
+        color="Loyalty_Score", color_continuous_scale="Blues"
+    )
+    fig.update_layout(xaxis_tickangle=-45)
+
+    st.plotly_chart(fig, use_container_width=True)
+
+except Exception as e:
+    st.warning(f"Loyalty data could not be loaded: {e}")
