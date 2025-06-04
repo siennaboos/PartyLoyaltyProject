@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, current_app, make_response
+import requests
+from mysql.connector import Error
 
 from backend.db_connection import db
 
@@ -15,6 +17,7 @@ def get_all_meps():
 
     cursor.execute(query)
     retrieved_users = cursor.fetchall()
+    cursor.close()
 
     current_app.logger.info("GET /users route success")
     response = make_response(jsonify(retrieved_users))
@@ -34,6 +37,7 @@ def get_mep(mepID):
 
     cursor.execute(query, (mepID))
     retrieved_mep = cursor.fetchone()
+    cursor.close()
 
     current_app.logger.info("GET /mep/<int:mepID> route success")
     response = make_response(jsonify(retrieved_mep))
@@ -54,12 +58,41 @@ def get_mep_loyalty_score(mepID):
 
     cursor.execute(query, (mepID))
     retrieved_mep = cursor.fetchone()
+    cursor.close()
 
     current_app.logger.info("GET /mep/<int:mepID>/score route success")
     response = make_response(jsonify(retrieved_mep))
     response.status_code = 200
     
     return response
+
+@meps.route("/mep/<int:mepID>/score", methods=['PUT'])
+def update_mep_loyalty_score(mepID):
+    current_app.logger.info('PUT /mep/<int:mepID>/score route entered')
+    
+    try:
+        data = requests.json()
+        
+        required_fields = ["loyaltyScore"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+        
+        cursor = db.get_db().cursor()
+        query = "UPDATE mep SET loyaltyScore, %s WHERE mepID = %s"
+
+        cursor.execute(query, (data['loyaltyScore'], mepID))
+        cursor.close()
+
+
+        current_app.logger.info("PUT /mep/<int:mepID>/score route success")
+
+        return (jsonify({"message": "MEP score successfully updated", "mepID": {mepID}, "loyaltyScore": data['loyaltyScore']}), 201,)
+
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 @meps.route("/mep/<int:mepID>/party", methods=['GET'])
@@ -75,6 +108,7 @@ def get_mep_party(mepID):
 
     cursor.execute(query, (mepID))
     retrieved_mep_party = cursor.fetchone()
+    cursor.close()
 
     current_app.logger.info("GET /mep/<int:mepID>/party route success")
     response = make_response(jsonify(retrieved_mep_party))
@@ -95,6 +129,7 @@ def get_mep_photo(mepID):
 
     cursor.execute(query, (mepID))
     retrieved_photo = cursor.fetchone()
+    cursor.close()
 
     current_app.logger.info("GET /mep/<int:mepID>/picture route success")
     response = make_response(jsonify(retrieved_photo))
