@@ -23,17 +23,17 @@ def PolStratAdvHomeNav():
 
 def WorldBankVizNav():
     st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
+        "pages/01_Party_Recommend.py", label="Party Recruitment Dashboard", icon="🧲"
     )
 
 
 def MapDemoNav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
+    st.sidebar.page_link("pages/02_Cohesion_Monitor.py", label="Party Cohesion Monitor", icon="📈")
 
 
 ## ------------------------ Examples for Role of usaid_worker ------------------------
 def ApiTestNav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
+    st.sidebar.page_link("pages/12_Cohesion_Monitor.py", label="Test the API", icon="🛜")
 
 
 def PredictionNav():
