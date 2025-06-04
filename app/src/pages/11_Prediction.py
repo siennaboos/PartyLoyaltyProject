@@ -3,33 +3,70 @@ import logging
 logger = logging.getLogger(__name__)
 
 import streamlit as st
-from modules.nav import SideBarLinks
 import requests
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-st.set_page_config(layout="wide")
-
-# Display the appropriate sidebar links for the role of the logged in user
+from modules.nav import SideBarLinks
 SideBarLinks()
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
 
-st.title("Prediction with Regression")
+# Title and Instructions
+st.title("📄 MEP Party Loyalty Records")
+st.markdown("Select an MEP to see their loyalty breakdown and photo.")
 
-# create a 2 column layout
-col1, col2 = st.columns(2)
+# Load Photo CSV – place the CSV near this script or adjust accordingly
+photo_df = pd.read_csv("mep_photo.csv")  # <-- move here if needed
 
-# add one number input for variable 1 into column 1
+# MEP Data – mock or real
+mep_df = pd.DataFrame({
+    "mep_id": [1, 2, 3, 4],
+    "MEP Name": ["Anna Müller", "Tomás García", "Lena Novak", "Marc Dubois"],
+    "Party": ["S&D", "Renew Europe", "EPP", "The Left"],
+    "Country": ["Germany", "Spain", "Croatia", "France"],
+    "Overall Loyalty Score": [84, 91, 76, 88],
+    "% Agreed": [72, 85, 66, 80],
+    "% Dissented": [20, 10, 28, 15],
+    "% Did Not Vote": [8, 5, 6, 5]
+})
+
+# Dropdown to select MEP
+selected_mep = st.selectbox("Select MEP", mep_df["MEP Name"])
+row = mep_df[mep_df["MEP Name"] == selected_mep].iloc[0]
+
+# Match photo by MEP ID
+photo_url = photo_df.loc[photo_df["mep_id"] == row["mep_id"], "photo_url"].values[0]
+
+# Layout for photo + stats
+col1, col2 = st.columns([1, 3])
+
 with col1:
-    var_01 = st.number_input("Variable 01:", step=1)
+    st.image(photo_url, caption=selected_mep, width=160)
 
-# add another number input for variable 2 into column 2
 with col2:
-    var_02 = st.number_input("Variable 02:", step=1)
+    st.subheader(selected_mep)
+    st.markdown(f"**Party**: {row['Party']}")
+    st.markdown(f"**Country**: {row['Country']}")
+    st.markdown(f"**Overall Loyalty Score**: {row['Overall Loyalty Score']}%")
 
-logger.info(f"var_01 = {var_01}")
-logger.info(f"var_02 = {var_02}")
+# Voting Record Breakdown
+st.markdown("### Voting Record Breakdown")
+labels = ["Agreed", "Dissented", "Did Not Vote"]
+values = [row["% Agreed"], row["% Dissented"], row["% Did Not Vote"]]
 
-# add a button to use the values entered into the number field to send to the
-# prediction function via the REST API
-if st.button("Calculate Prediction", type="primary", use_container_width=True):
-    results = requests.get(f"http://web-api:4000/prediction/{var_01}/{var_02}")
-    json_results = results.json()
-    st.dataframe(json_results)
+fig, ax = plt.subplots()
+ax.bar(labels, values, color=["#4CAF50", "#F44336", "#9E9E9E"])
+ax.set_ylabel("% of Votes")
+ax.set_ylim(0, 100)
+st.pyplot(fig)
+
+# Footer
+st.markdown("---")
+st.caption("Use this dashboard to explore individual MEP party loyalty patterns.")

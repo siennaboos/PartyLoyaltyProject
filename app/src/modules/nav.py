@@ -33,13 +33,13 @@ def MapDemoNav():
 
 ## ------------------------ Examples for Role of usaid_worker ------------------------
 def ApiTestNav():
-    st.sidebar.page_link("pages/12_Cohesion_Monitor.py", label="Test the API", icon="🛜")
+    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
 
 
 def PredictionNav():
     st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
-    )
+        "pages/11_Prediction.py", label="MEP Party Loyalty Records", icon="📄"
+)
 
 
 def ClassificationNav():

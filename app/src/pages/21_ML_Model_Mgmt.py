@@ -8,21 +8,45 @@ st.set_page_config(layout = 'wide')
 
 SideBarLinks()
 
-st.title('App Administration Page')
+import streamlit as st
+import pandas as pd
 
-st.write('\n\n')
-st.write('## Model 1 Maintenance')
+st.title("🧑‍⚖️ MEPs & Party Profiles")
+st.markdown("Learn more about MEPs and the political parties they represent.")
 
-st.button("Train Model 01", 
-            type = 'primary', 
-            use_container_width=True)
+# --- MOCK DATA ---
+mep_df = pd.DataFrame({
+    "mep_id": [101, 102, 103, 104],
+    "name": ["Anna Müller", "Tomás García", "Lena Novak", "Marc Dubois"],
+    "country": ["Germany", "Spain", "Croatia", "France"],
+    "party": ["S&D", "Renew Europe", "EPP", "The Left"],
+    "policy_focus": ["Environment", "Digital Innovation", "Finance", "Human Rights"]
+})
 
-st.button('Test Model 01', 
-            type = 'primary', 
-            use_container_width=True)
+party_df = pd.DataFrame({
+    "party": ["S&D", "Renew Europe", "EPP", "The Left"],
+    "description": [
+        "Center-left group supporting social equality, jobs, and climate action.",
+        "Liberal, pro-European group focused on innovation, trade, and civil liberties.",
+        "Center-right party advocating for economic stability and traditional values.",
+        "Progressive leftist alliance fighting for social justice and anti-austerity."
+    ]
+})
 
-if st.button('Model 1 - get predicted value for 10, 25', 
-             type = 'primary',
-             use_container_width=True):
-  results = requests.get('http://web-api:4000/prediction/10/25').json()
-  st.dataframe(results)
+# --- MEP Selection ---
+selected_mep = st.selectbox("🔍 Select an MEP", mep_df["name"])
+mep_info = mep_df[mep_df["name"] == selected_mep].iloc[0]
+
+st.subheader(f"🇪🇺 {mep_info['name']}")
+st.markdown(f"**Country**: {mep_info['country']}")
+st.markdown(f"**Party**: {mep_info['party']}")
+st.markdown(f"**Policy Focus**: {mep_info['policy_focus']}")
+
+# --- Party Info ---
+st.markdown("### 🏛️ Party Platform Overview")
+party_description = party_df[party_df["party"] == mep_info["party"]]["description"].values[0]
+st.markdown(f"**{mep_info['party']}** — {party_description}")
+
+# --- Future Section Placeholder ---
+st.markdown("---")
+st.caption("Soon: Compare voting records, add favorites, and get candidate recommendations based on your views.")
