@@ -15,6 +15,7 @@ def get_all_parties():
 
     cursor.execute(query)
     retrieved_parties = cursor.fetchall()
+    cursor.close()
 
     current_app.logger.info("GET /parties route success")
     response = make_response(jsonify(retrieved_parties))
@@ -36,6 +37,7 @@ def get_party(partyID):
 
     cursor.execute(query, (partyID))
     retrieved_party = cursor.fetchone()
+    cursor.close()
 
     current_app.logger.info("GET /party/<int:partyID> route success")
     response = make_response(jsonify(retrieved_party))
@@ -56,6 +58,7 @@ def get_overall_party_loyalty(partyID):
 
     cursor.execute(query, (partyID))
     retrieved_party = cursor.fetchone()
+    cursor.close()
 
     current_app.logger.info("GET /party/<int:partyID>/score route success")
     response = make_response(jsonify(retrieved_party))

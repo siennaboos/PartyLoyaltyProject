@@ -6,7 +6,6 @@ users = Blueprint("users", __name__)
 
 @users.route("/users", methods=["GET"])
 def get_users():
-    
     current_app.logger.info('GET /users route entered')
     query = '''
         SELECT userID, age, countryOfOrigin, firstName, lastName, partyID, watchListID, userRoleID
@@ -16,6 +15,7 @@ def get_users():
 
     cursor.execute(query)
     retrieved_users = cursor.fetchall()
+    cursor.close()
     
     current_app.logger.info("GET /users route success")
     response = make_response(jsonify(retrieved_users))
@@ -38,6 +38,7 @@ def get_user(userID):
 
     cursor.execute(query, (userID))
     retrieved_users = cursor.fetchall()
+    cursor.close()
 
     current_app.logger.info("GET /users route success")
     response = make_response(jsonify(retrieved_users))
@@ -61,6 +62,7 @@ def get_user_role(userID):
 
     cursor.execute(query, (userID))
     retrieved_users = cursor.fetchall()
+    cursor.close()
 
     current_app.logger.info("GET /users route success")
     response = make_response(jsonify(retrieved_users))
