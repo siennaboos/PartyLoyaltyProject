@@ -28,6 +28,27 @@ st.session_state['authenticated'] = False
 from modules.nav import SideBarLinks
 SideBarLinks(show_home=True)
 
+
+# Inject global CSS for font override
+st.markdown("""
+    <style>
+    html, body, [class*="css"]  {
+        font-family: 'Georgia', serif !important;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #222;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Georgia', serif !important;
+    }
+
+    .block-container {
+        padding: 2rem 3rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # ***************************************************
 # LOGIN SECTION — your original code (kept exactly)
 # ***************************************************
@@ -44,7 +65,7 @@ st.write('#### HI! As which user would you like to log in?')
 # functionality, we put a button on the screen that the user 
 # can click to MIMIC logging in as that mock user. 
 
-if st.button("Act as Γιάννη Πούλος (Yanni Poulos), a Party Leader: Seeing Unity Within Your Party", 
+if st.button("Act as Γιάννη Πούλος (Yanni Poulos), a Party Leader", 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True

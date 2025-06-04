@@ -33,19 +33,19 @@ def MapDemoNav():
 
 ## ------------------------ Examples for Role of usaid_worker ------------------------
 def ApiTestNav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
+    st.sidebar.page_link("pages/12_API_Test.py", label="MEP Party Loyalty Records", icon="📄")
 
 
 def PredictionNav():
     st.sidebar.page_link(
-        "pages/11_Prediction.py", label="MEP Party Loyalty Records", icon="📄"
+        "pages/11_Prediction.py", label="Party Cohesion Monitor", icon="🖥️"
 )
-
 
 def ClassificationNav():
     st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
+        "pages/13_Classification.py", label=" Party Cohesion Monitor", icon="🖥️"
     )
+
 
 
 def NgoDirectoryNav():
@@ -71,7 +71,7 @@ def SideBarLinks(show_home=False):
     """
 
     # add a logo to the sidebar always
-    st.sidebar.image("assets/logo.png", width=150)
+    st.sidebar.image("assets/our_logo.png", width=150)
 
     # If there is no logged in user, redirect to the Home (Landing) page
     if "authenticated" not in st.session_state:

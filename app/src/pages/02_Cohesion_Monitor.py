@@ -7,27 +7,58 @@ import pydeck as pdk
 from urllib.error import URLError
 from modules.nav import SideBarLinks
 
-SideBarLinks()
 
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# --- Page Config ---
-st.title("📈 Party Cohesion Monitor")
-st.markdown("Analyze how united parties are over time — and how yours compares.")
+st.markdown("""
+    <style>
+    html, body, [class*="css"]  {
+        font-family: 'Georgia', serif !important;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #222;
+    }
 
-# --- Date Picker ---
-st.markdown("### Select a Date Range")
-date_range = st.date_input("Choose range:", [], key="date_range", help="Filter party cohesion by date range")
+    h1, h2, h3, h4 {
+        font-family: 'Georgia', serif !important;
+    }
 
-# --- Party Selection ---
-st.markdown("### Select Parties to Compare")
-parties = ["My Party", "X Party", "Y Party"]
-selected_parties = st.multiselect("Parties included:", parties, default=["My Party"])
+    .block-container {
+        padding: 2rem 3rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# --- Mock Cohesion Over Time Data ---
+SideBarLinks()
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+from modules.nav import SideBarLinks
+
+# --- Sidebar Navigation ---
+
+# --- Page Setup ---
+st.title("📊 Party Cohesion Dashboard")
+st.markdown("Track dissent and alignment across EU parties with visual insights.")
+
+# --- Date Range and Party Selection ---
+col1, col2 = st.columns([1, 2])
+
+with col1:
+    st.markdown("#### 📅 Date Range")
+    st.date_input("Choose a time window:", [], key="date_range")
+
+with col2:
+    st.markdown("#### 🏛️ Select Parties")
+    parties = ["My Party", "X Party", "Y Party"]
+    selected_parties = st.multiselect("Included Parties", parties, default=parties)
+
+# --- Mock Data ---
 dates = pd.date_range(start="2023-01-01", periods=12, freq="M")
 data = {
     "My Party": np.random.uniform(80, 95, size=12),
@@ -35,38 +66,51 @@ data = {
     "Y Party": np.random.uniform(70, 90, size=12)
 }
 
-# --- Line Chart ---
-st.markdown("### 🧭 Party Loyalty Over Time")
-fig, ax = plt.subplots()
-for party in selected_parties:
-    ax.plot(dates, data[party], label=party)
-ax.set_ylabel("% Votes in Alignment")
-ax.set_xlabel("Date")
-ax.set_title("Voting Cohesion Trends")
-ax.legend()
-st.pyplot(fig)
+# --- Dashboard Charts ---
+chart_col1, chart_col2 = st.columns(2)
 
-# --- Bar Chart (Summary for Selected Range) ---
-st.markdown("### 📊 Cohesion Summary (Selected Parties)")
-summary_data = pd.DataFrame({
-    "Party": selected_parties,
-    "% Alignment": [round(data[p].mean(), 1) for p in selected_parties],
-    "% Dissent": [round(100 - data[p].mean(), 1) for p in selected_parties]
-})
+# --- Line Chart: Cohesion Over Time ---
+with chart_col1:
+    st.markdown("#### 📈 Alignment Over Time")
+    fig_line = go.Figure()
+    for party in selected_parties:
+        fig_line.add_trace(go.Scatter(
+            x=dates,
+            y=data[party],
+            mode='lines+markers',
+            name=party,
+            hovertemplate='%{y:.1f}% alignment<br>%{x|%b %Y}'
+        ))
+    fig_line.update_layout(
+        height=350,
+        margin=dict(l=10, r=10, t=30, b=20),
+        yaxis_title="% Votes Aligned",
+        xaxis_title="Date",
+        legend_title="Party",
+        template="plotly_white"
+    )
+    st.plotly_chart(fig_line, use_container_width=True)
 
-# Create a grouped bar chart for alignment vs. dissent
-fig2, ax2 = plt.subplots()
-x = np.arange(len(selected_parties))
-width = 0.35
-ax2.bar(x - width/2, summary_data["% Alignment"], width, label="Alignment")
-ax2.bar(x + width/2, summary_data["% Dissent"], width, label="Dissent")
-ax2.set_xticks(x)
-ax2.set_xticklabels(selected_parties)
-ax2.set_ylabel("% of Votes")
-ax2.set_title("Party Cohesion Overview")
-ax2.legend()
-st.pyplot(fig2)
+# --- Bar Chart: Alignment vs. Dissent ---
+with chart_col2:
+    st.markdown("#### 📊 Alignment vs Dissent")
+    alignment = [round(data[p].mean(), 1) for p in selected_parties]
+    dissent = [round(100 - val, 1) for val in alignment]
+
+    fig_bar = go.Figure(data=[
+        go.Bar(name='Alignment', x=selected_parties, y=alignment, marker_color='green'),
+        go.Bar(name='Dissent', x=selected_parties, y=dissent, marker_color='crimson')
+    ])
+    fig_bar.update_layout(
+        barmode='group',
+        height=350,
+        margin=dict(l=10, r=10, t=30, b=20),
+        yaxis_title="% of Votes",
+        template="plotly_white",
+        legend_title="Vote Type"
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
 
 # --- Footer ---
 st.markdown("---")
-st.caption("Monitor trends in party loyalty and compare cohesion across EU parties.")
+st.caption("Explore party cohesion trends across the EU Parliament — built with 💡 by your data team.")
