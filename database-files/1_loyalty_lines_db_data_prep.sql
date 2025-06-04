@@ -1,6 +1,5 @@
 USE loyalty_lines;
 
-
 -- PREPARE POLIICAL PARTIES
 INSERT INTO political_party (partyName)
 VALUES ("Group of the European People's Party");
@@ -37,11 +36,11 @@ INSERT INTO userRole(userRoleID, userRoleName)
 VALUES (3, "Citizen");
 
 -- PREARE USER PERSONAS
-INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRole)
+INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
 VALUES ("59", "Greece", "Yanni", "Polous", 1, 3);
 
-INSERT INTO user (age, countryOfOrigin, firstName, lastName, userRole)
+INSERT INTO user (age, countryOfOrigin, firstName, lastName, userRoleID)
 VALUES ("30", "Spain", "Camila", "Romero", 2);
 
-INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRole)
+INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
 VALUES ("23", "Switzerland", "Greg", "Gerborg", 3, 1)

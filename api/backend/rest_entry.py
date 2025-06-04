@@ -6,7 +6,8 @@ from logging.handlers import RotatingFileHandler
 
 from backend.db_connection import db
 from backend.routes.mep_routes.mep_routes import meps
-from backend.routes.users.users_routes import users
+from backend.routes.users_routes.users_routes import users
+from backend.routes.party_routes.party_routes import parties
 
 
 def create_app():
@@ -43,8 +44,9 @@ def create_app():
 
     # Route registering
     app.logger.info("create_app(): registering blueprints with Flask app object.")
-    app.register_blueprint(meps, url_prefix="/meps")
-    app.register_blueprint(users, url_prefix="/users")
+    app.register_blueprint(meps, url_prefix="/m")
+    app.register_blueprint(users, url_prefix="/u")
+    app.register_blueprint(parties, url_prefix="/p")
 
     # Don't forget to return the app object
     return app

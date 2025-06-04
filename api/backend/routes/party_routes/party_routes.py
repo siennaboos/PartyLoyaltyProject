@@ -22,13 +22,15 @@ def get_all_parties():
     
     return response
 
-@parties.route("/parties/<int:partyID>")
+
+
+@parties.route("/parties/<int:partyID>", methods=['GET'])
 def get_party(partyID):
     current_app.logger.info('GET /party/<int:partyID> route entered')
     query = '''
         SELECT partyID, partyCohesionScore, partyName
         FROM political_party
-        WHERE paryID = %s
+        WHERE partyID = %s
     '''
     cursor = db.get_db().cursor()
 
@@ -40,3 +42,24 @@ def get_party(partyID):
     response.status_code = 200
     
     return response
+
+
+@parties.route("/parties/<int:partyID>/score", methods=['GET'])
+def get_overall_party_loyalty(partyID):
+    current_app.logger.info('GET /party/<int:partyID>/score route entered')
+    query = '''
+        SELECT partyCohesionScore
+        FROM political_party
+        WHERE partyID = %s
+    '''
+    cursor = db.get_db().cursor()
+
+    cursor.execute(query, (partyID))
+    retrieved_party = cursor.fetchone()
+
+    current_app.logger.info("GET /party/<int:partyID>/score route success")
+    response = make_response(jsonify(retrieved_party))
+    response.status_code = 200
+    
+    return response
+

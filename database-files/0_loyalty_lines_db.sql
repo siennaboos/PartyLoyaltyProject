@@ -14,8 +14,10 @@ CREATE TABLE IF NOT EXISTS mep (
     mepID INT PRIMARY KEY,
     name VARCHAR(255),
     countryOfOrigin VARCHAR(255),
+    loyaltyScore INT,
     partyID INT,
     recommendedPartyID INT,
+    photoURL VARCHAR(255),
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
     FOREIGN KEY (recommendedPartyID) REFERENCES political_party(partyID)
 );
@@ -46,10 +48,10 @@ CREATE TABLE IF NOT EXISTS user (
     lastName VARCHAR(255),
     partyID INT,
     watchListID INT,
-    userRole INT,
+    userRoleID INT,
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
     FOREIGN KEY (watchListID) REFERENCES watchList(watchListID),
-    FOREIGN KEY (userRole) REFERENCES userRole(userRoleID)
+    FOREIGN KEY (userRoleID) REFERENCES userRole(userRoleID)
 );
 
 
