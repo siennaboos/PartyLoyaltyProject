@@ -4,7 +4,25 @@ logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 
-st.set_page_config(layout = 'wide')
+# Inject global CSS for font override
+st.markdown("""
+    <style>
+    html, body, [class*="css"]  {
+        font-family: 'Georgia', serif !important;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #222;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Georgia', serif !important;
+    }
+
+    .block-container {
+        padding: 2rem 3rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Show appropriate sidebar links for the role of the currently logged in user
 SideBarLinks()
