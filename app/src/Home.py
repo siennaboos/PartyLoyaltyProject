@@ -14,8 +14,12 @@ import pandas as pd
 import requests
 import plotly.express as px
 
-# Streamlit layout config
-st.set_page_config(layout='wide')
+import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
+
+st.set_page_config(layout="wide")  # ✅ FIRST Streamlit command
+
 
 # Assume user is unauthenticated at start
 st.session_state['authenticated'] = False
@@ -23,6 +27,27 @@ st.session_state['authenticated'] = False
 # Sidebar navigation setup
 from modules.nav import SideBarLinks
 SideBarLinks(show_home=True)
+
+
+# Inject global CSS for font override
+st.markdown("""
+    <style>
+    html, body, [class*="css"]  {
+        font-family: 'Georgia', serif !important;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #222;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Georgia', serif !important;
+    }
+
+    .block-container {
+        padding: 2rem 3rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # ***************************************************
 # LOGIN SECTION — your original code (kept exactly)
@@ -40,7 +65,7 @@ st.write('#### HI! As which user would you like to log in?')
 # functionality, we put a button on the screen that the user 
 # can click to MIMIC logging in as that mock user. 
 
-if st.button("Act as John, a Political Strategy Advisor", 
+if st.button("Act as Γιάννη Πούλος (Yanni Poulos), a Party Leader", 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
@@ -49,7 +74,7 @@ if st.button("Act as John, a Political Strategy Advisor",
     logger.info("Logging in as Political Strategy Advisor Persona")
     st.switch_page('pages/00_Pol_Strat_Home.py')
 
-if st.button('Act as Mohammad, an USAID worker', 
+if st.button('Act as Camila Romero, a Political Journalist', 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
@@ -57,7 +82,7 @@ if st.button('Act as Mohammad, an USAID worker',
     st.session_state['first_name'] = 'Mohammad'
     st.switch_page('pages/10_USAID_Worker_Home.py')
 
-if st.button('Act as System Administrator', 
+if st.button('Act as Greg Gerborg, a Citizen', 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
@@ -70,9 +95,8 @@ if st.button('Act as System Administrator',
 # ***************************************************
 
 st.divider()
-import pandas as pd
-import streamlit as st
-import plotly.graph_objects as go
+st.subheader("📊 Preview: MEP Loyalty Scoreboard")
+
 
 # Dummy party seat counts — update dynamically from CSV in production
 party_seats = {
@@ -87,6 +111,7 @@ party_seats = {
     'NI': 33
 }
 
+
 # Color mapping 
 party_colors = {
     'EPP': '#0056A0',
@@ -100,7 +125,7 @@ party_colors = {
     'NI': '#444444'
 }
 
-# Now you can continue:
+
 st.title("European Parliament Majority Builder")
 
 # Checkbox controls
@@ -117,8 +142,9 @@ selected_seats = sum(party_seats[p] for p in selected_parties)
 total_seats = sum(party_seats.values())
 missing = max(0, 361 - selected_seats)
 
-# Pie chart setup
-labels = selected_parties + ["Hidden"]
+
+labels = selected_parties + ["Remaining"]
+
 values = [party_seats[p] for p in selected_parties] + [total_seats]
 colors = [party_colors[p] for p in selected_parties] + ['rgba(0,0,0,0)']  # transparent
 
@@ -133,8 +159,8 @@ fig = go.Figure(data=[go.Pie(
     showlegend=False
 )])
 
-fig.update_traces(rotation=270)  # ← was 180 before
-fig.update_traces(marker_line_width=0)
+
+fig.update_traces(rotation=270)  
 fig.update_layout(
     height=600,
     width=800,
