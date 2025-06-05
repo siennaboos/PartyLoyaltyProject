@@ -56,3 +56,33 @@ def add_user_to_watchlist(userID):
         
     except Error as e:
         return jsonify({"error": str(e)}), 500
+
+
+@watchlists.route("/user/<int:mepID>/watchlists", method=['DELETE'])
+def remove_mep_from_watchlist(mepID):
+    current_app.logger.info('DELETE /user/<mepID>/watchlists route entered')
+
+    try:
+        data = request.json
+
+        required_fields = ["watchListID"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        cursor = db.get_db().cursor()
+
+        query = """
+            DELETE FROM mepToWatchList
+            WHERE watchListID = %s
+              AND mepID = %s;
+        """
+        cursor.execute(query, (data["watchListID"], mepID))
+
+        db.get_db().commit()
+        cursor.close()
+
+        return (jsonify({"message":  "MEP removed successfully", "mepID": mepID,"watchListID": data["watchListID"]}), 200,)
+
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
