@@ -1,5 +1,4 @@
-from flask import Blueprint, jsonify, current_app, make_response
-import requests
+from flask import Blueprint, request, jsonify, current_app, make_response
 from mysql.connector import Error
 
 from backend.db_connection import db
@@ -24,6 +23,38 @@ def get_all_meps():
     response.status_code = 200
     
     return response
+
+@meps.route("/meps", methods=['POST'])
+def create_mep():
+    current_app.logger.info('POST /meps route entered')
+
+    try:
+        data = request.json()
+
+        required_fields = ["mepID", "name", "countryOfOrigin", "photoURL"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        cursor = db.get_db().cursor()
+
+        query = """
+            INSERT INTO meps (mepID, name, countryOfOrigin, photoURL)
+            VALUES (%s, %s, %s, %s);
+        """
+
+        cursor.execute(query, (data['mepID'],
+                                data['name'],
+                                data['countryOfOrigin'],
+                                data['photoURL']))
+    
+        db.get_db().commit()
+        cursor.close()
+        
+        return (jsonify({"message": "MEP created successfully", "mepID": data["mepID"]}), 201,)
+        
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
 
 @meps.route("/meps/<int:mepID>", methods=['GET'])
 def get_mep(mepID):

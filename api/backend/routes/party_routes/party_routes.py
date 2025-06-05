@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, current_app, make_response
+from mysql.connector import Error
 
 from backend.db_connection import db
 
@@ -66,3 +67,28 @@ def get_overall_party_loyalty(partyID):
     
     return response
 
+@parties.route("/parties/<int:partyID>/score", methods=['PUT'])
+def update_mep_loyalty_score(partyID):
+    current_app.logger.info('PUT /parties/<int:partyID>/score route entered')
+    
+    try:
+        data = requests.json()
+        
+        required_fields = ["partyCohesionScore"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+        
+        cursor = db.get_db().cursor()
+        query = "UPDATE parties SET partyCohesionScore, %s WHERE partyID = %s"
+
+        cursor.execute(query, (data['partyCohesionScore'], partyID))
+        cursor.close()
+
+
+        current_app.logger.info("PUT /parties/<int:partyID>/score route success")
+
+        return (jsonify({"message": "Parties score successfully updated", "partyID": {partyID}, "partyCohesionScore": data['partyCohesionScore']}), 201,)
+
+    except Error as e:
+        return jsonify({"error": str(e)}), 500
