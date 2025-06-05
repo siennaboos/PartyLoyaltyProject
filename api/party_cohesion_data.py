@@ -70,7 +70,8 @@ def get_all_data():
             vote_resp.raise_for_status()
             vote_data = vote_resp.json()
 
-            timestamp = vote_data.get('timestamp', '')[:10]
+            timestamp = vote_data.get('timestamp')
+            timestamp = pd.to_datetime(timestamp)
             for group in vote_data['stats']['by_group']:
                 party = group['group']['label']
                 stats = group['stats']
@@ -104,11 +105,8 @@ def main():
     # make needed columns to calculate the percent of dissenters from each party on each vote
     df['majority_vote_count'] = df[['votes_for', 'votes_against', 'abstentions', 'no_votes']].max(axis=1)
     df['majority_col'] = df[['votes_for', 'votes_against', 'abstentions', 'no_votes']].idxmax(axis=1)
-    df['total_votes'] = df[['votes_for', 'votes_against', 'abstentions', 'no_votes']].sum(axis=1)
-    df['percent_dissenters'] = ((df['total_votes'] - df['majority_vote_count']) / df['total_votes']) * 100
 
     # store data in a csv
-    df.to_csv('processed_votes.csv', index=False)
 
 if __name__ == "__main__":
     main()
