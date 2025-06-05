@@ -126,14 +126,14 @@ def update_mep_loyalty_score(mepID):
 
 
 
-@meps.route("/mep/<int:mepID>/party", methods=['GET'])
+@meps.route("/meps/<int:mepID>/party", methods=['GET'])
 def get_mep_party(mepID):
     current_app.logger.info('GET /mep/<int:mepID>/party route entered')
     query = '''
-        SELECT partyID, partyName 
+        SELECT mep.partyID, partyName 
         FROM mep 
-        JOIN poliical_party as p ON mep.partyID = p.partyID
-        WHERE mepID = mepID;
+        JOIN political_party as p ON mep.partyID = p.partyID
+        WHERE mepID = %s;
     '''
     cursor = db.get_db().cursor()
 
