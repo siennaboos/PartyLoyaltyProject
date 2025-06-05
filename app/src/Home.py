@@ -97,6 +97,7 @@ if st.button('Act as Greg Gerborg, a Citizen',
 st.divider()
 st.subheader("📊 Preview: MEP Loyalty Scoreboard")
 
+
 # Dummy party seat counts — update dynamically from CSV in production
 party_seats = {
     'EPP': 188,
@@ -110,7 +111,8 @@ party_seats = {
     'NI': 33
 }
 
-# Color mapping (feel free to customize)
+
+# Color mapping 
 party_colors = {
     'EPP': '#0056A0',
     'S&D': '#E60000',
@@ -122,6 +124,9 @@ party_colors = {
     'ESN': '#888888',
     'NI': '#444444'
 }
+
+
+st.title("European Parliament Majority Builder")
 
 # Checkbox controls
 st.write("### Select political groups to include in the coalition:")
@@ -137,8 +142,9 @@ selected_seats = sum(party_seats[p] for p in selected_parties)
 total_seats = sum(party_seats.values())
 missing = max(0, 361 - selected_seats)
 
-# Pie chart setup
+
 labels = selected_parties + ["Remaining"]
+
 values = [party_seats[p] for p in selected_parties] + [total_seats]
 colors = [party_colors[p] for p in selected_parties] + ['rgba(0,0,0,0)']  # transparent
 
@@ -152,6 +158,7 @@ fig = go.Figure(data=[go.Pie(
     marker=dict(colors=colors),
     showlegend=False
 )])
+
 
 fig.update_traces(rotation=270)  
 fig.update_layout(
