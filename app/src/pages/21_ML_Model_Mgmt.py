@@ -14,22 +14,49 @@ import pandas as pd
 st.title("🧑‍⚖️ MEPs & Party Profiles")
 st.markdown("Learn more about MEPs and the political parties they represent.")
 
-# --- MOCK DATA ---
-mep_df = pd.DataFrame({
-    "mep_id": [101, 102, 103, 104],
-    "name": ["Anna Müller", "Tomás García", "Lena Novak", "Marc Dubois"],
-    "country": ["Germany", "Spain", "Croatia", "France"],
-    "party": ["S&D", "Renew Europe", "EPP", "The Left"],
-    "policy_focus": ["Environment", "Digital Innovation", "Finance", "Human Rights"]
-})
+# call backend api and get mep info
+resp = requests.get("http://web-api:4000/m/meps")
+
+meps = None
+if resp.status_code == 200:
+    meps = resp.json()
+
+
+# # MEP Data – mock or real
+mep_df = pd.DataFrame()
+for mep in meps:
+    party = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party').json()["partyName"]
+
+    df2 = pd.DataFrame([{"name": mep["name"],
+                          "party": party,
+                        "country": mep["countryOfOrigin"],
+                        "Overall Loyalty Score": mep["loyaltyScore"],
+                        "% Agreed": 72,
+                        "% Dissented": 28,
+                        "% Did Not Vote": 8},])
+    mep_df = pd.concat([mep_df, df2], ignore_index=True)
+
 
 party_df = pd.DataFrame({
-    "party": ["S&D", "Renew Europe", "EPP", "The Left"],
+    "party": [
+        "Group of the Progressive Alliance of Socialists and Democrats in the European Parliament",
+        "Renew Europe Group",
+        "Group of the European People's Party",
+        "The Left group in the European Parliament",
+        "Patriots for Europe Group",
+        "European Conservatives and Reformists Group",
+        "Group of the Greens/European Free Alliance",
+        "Europe of Sovereign Nations Group"
+    ],
     "description": [
         "Center-left group supporting social equality, jobs, and climate action.",
         "Liberal, pro-European group focused on innovation, trade, and civil liberties.",
         "Center-right party advocating for economic stability and traditional values.",
-        "Progressive leftist alliance fighting for social justice and anti-austerity."
+        "Progressive leftist alliance fighting for social justice and anti-austerity.",
+        "Nationalist, euroskeptic coalition emphasizing European sovereignty and cultural heritage.",
+        "Conservative-leaning alliance promoting economic liberalism and national sovereignty.",
+        "Green and regionalist bloc championing environmental protection and minority rights.",
+        "Right-wing group stressing national sovereignty and opposing deeper EU federalism."
     ]
 })
 
@@ -40,7 +67,6 @@ mep_info = mep_df[mep_df["name"] == selected_mep].iloc[0]
 st.subheader(f"🇪🇺 {mep_info['name']}")
 st.markdown(f"**Country**: {mep_info['country']}")
 st.markdown(f"**Party**: {mep_info['party']}")
-st.markdown(f"**Policy Focus**: {mep_info['policy_focus']}")
 
 # --- Party Info ---
 st.markdown("### 🏛️ Party Platform Overview")
