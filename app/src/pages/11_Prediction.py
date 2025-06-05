@@ -62,7 +62,10 @@ for mep in meps:
     df2 = pd.DataFrame([{"name": mep["name"],
                           "Party": party,
                         "Country": mep["countryOfOrigin"],
-                        "Overall Loyalty Score": mep["loyaltyScore"]}])
+                        "Overall Loyalty Score": mep["loyaltyScore"],
+                        "% Agreed": 72,
+                        "% Dissented": 28,
+                        "% Did Not Vote": 8},])
     mep_df = pd.concat([mep_df, df2], ignore_index=True)
 
 
