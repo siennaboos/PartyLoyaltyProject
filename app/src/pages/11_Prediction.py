@@ -62,17 +62,21 @@ for mep in meps:
     df2 = pd.DataFrame([{"name": mep["name"],
                           "Party": party,
                         "Country": mep["countryOfOrigin"],
-                        "Overall Loyalty Score":mep["loyaltyScore"]}])
+                        "Overall Loyalty Score": mep["loyaltyScore"]}])
     mep_df = pd.concat([mep_df, df2], ignore_index=True)
 
 
+
+
+photo_df = pd.read_csv("mep_photo.csv")  
 
 # Dropdown to select MEP
 selected_mep = st.selectbox("Select MEP", mep_df["name"])
 row = mep_df[mep_df["name"] == selected_mep].iloc[0]
 
 # Match photo by MEP ID
-photo_url = photo_df.loc[photo_df["mepID"] == row["mepID"], "photo_url"].values[0]
+# photo_url = photo_df.loc[photo_df["mepID"] == row["mepID"], "photo_url"].values[0]
+photo_url = "https://www.europarl.europa.eu/mepphoto/96834.jpg" # temporarily hardcoded
 
 # Layout for photo + stats
 col1, col2 = st.columns([1, 3])
