@@ -47,7 +47,7 @@ def get_user(userID):
     return response
 
 
-@users.route("/user/<int:userID>/role", methods=["GET"])
+@users.route("/users/<int:userID>/role", methods=["GET"])
 def get_user_role(userID):
     current_app.logger.info("GET /user/<int:userID>/role route entered")
 

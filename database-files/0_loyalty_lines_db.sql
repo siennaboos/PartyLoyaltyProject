@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS political_party (
 CREATE TABLE IF NOT EXISTS mep (
     mepID INT PRIMARY KEY,
     name VARCHAR(255),
+    contactInformation VARCHAR(255),
     countryOfOrigin VARCHAR(255),
     loyaltyScore INT,
     partyID INT,
