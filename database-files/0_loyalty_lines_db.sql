@@ -1,11 +1,11 @@
-DROP DATABASE IF EXISTS plp;
-CREATE DATABASE IF NOT EXISTS plp;
+DROP DATABASE IF EXISTS loyalty_lines;
+CREATE DATABASE IF NOT EXISTS loyalty_lines;
 
-USE plp;
+USE loyalty_lines;
 
 
 CREATE TABLE IF NOT EXISTS political_party (
-    partyID INT PRIMARY KEY,
+    partyID INT AUTO_INCREMENT PRIMARY KEY,
     partyCohesionScore INT,
     partyName VARCHAR(255)
 );
@@ -13,11 +13,14 @@ CREATE TABLE IF NOT EXISTS political_party (
 CREATE TABLE IF NOT EXISTS mep (
     mepID INT PRIMARY KEY,
     name VARCHAR(255),
+    contactInformation VARCHAR(255),
     countryOfOrigin VARCHAR(255),
+    loyaltyScore INT,
     partyID INT,
-    recommendedParty INT,
+    recommendedPartyID INT,
+    photoURL VARCHAR(255),
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
-    FOREIGN KEY (recommendedParty) REFERENCES political_party(partyID)
+    FOREIGN KEY (recommendedPartyID) REFERENCES political_party(partyID)
 );
 
 
@@ -33,18 +36,23 @@ CREATE TABLE IF NOT EXISTS mepToWatchList (
     FOREIGN KEY (mepID) REFERENCES mep(mepID)
 );
 
+CREATE TABLE IF NOT EXISTS userRole (
+    userRoleID INT PRIMARY KEY,
+    userRoleName VARCHAR(255)
+);
+
 CREATE TABLE IF NOT EXISTS user (
-    userID INT PRIMARY KEY,
+    userID INT AUTO_INCREMENT PRIMARY KEY,
     age INT,
     countryOfOrigin VARCHAR(255),
     firstName VARCHAR(255),
     lastName VARCHAR(255),
     partyID INT,
     watchListID INT,
-    headOfParty INT,
+    userRoleID INT,
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
     FOREIGN KEY (watchListID) REFERENCES watchList(watchListID),
-    FOREIGN KEY (headOfParty) REFERENCES political_party(partyID)
+    FOREIGN KEY (userRoleID) REFERENCES userRole(userRoleID)
 );
 
 
