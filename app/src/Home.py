@@ -18,7 +18,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-st.set_page_config(layout="wide")  # ✅ FIRST Streamlit command
+st.set_page_config(layout="wide")  
 
 
 # Assume user is unauthenticated at start
@@ -55,10 +55,9 @@ st.markdown("""
 
 # set the title of the page and provide a simple prompt. 
 logger.info("Loading the Home page of the app")
-st.title('European Parliament Party Loyalty and Cohesion Analysis')
+st.title('Loyalty Lines')
+st.write('## European Parliament Party Loyalty and Cohesion Analysis')
 st.write('\n\n')
-st.write('### 2025 Summer 1 Dialogue of Civilizations')
-st.write('\n')
 st.write('#### HI! As which user would you like to log in?')
 
 # For each of the user personas for which we are implementing
@@ -69,26 +68,26 @@ if st.button("Act as Γιάννη Πούλος (Yanni Poulos), a Party Leader",
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
-    st.session_state['role'] = 'pol_strat_advisor'
-    st.session_state['first_name'] = 'John'
-    logger.info("Logging in as Political Strategy Advisor Persona")
-    st.switch_page('pages/00_Pol_Strat_Home.py')
+    st.session_state['role'] = 'party_leader'
+    st.session_state['first_name'] = 'Yanni'
+    logger.info("Logging in as Party Leader Persona")
+    st.switch_page('pages/00_Party_Leader_Home.py')
 
 if st.button('Act as Camila Romero, a Political Journalist', 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
-    st.session_state['role'] = 'usaid_worker'
-    st.session_state['first_name'] = 'Mohammad'
-    st.switch_page('pages/10_USAID_Worker_Home.py')
+    st.session_state['role'] = 'political_journalist'
+    st.session_state['first_name'] = 'Camila'
+    st.switch_page('pages/10_Political_Journalist_Home.py')
 
 if st.button('Act as Greg Gerborg, a Citizen', 
             type = 'primary', 
             use_container_width=True):
     st.session_state['authenticated'] = True
-    st.session_state['role'] = 'administrator'
-    st.session_state['first_name'] = 'SysAdmin'
-    st.switch_page('pages/20_Admin_Home.py')
+    st.session_state['role'] = 'citizen'
+    st.session_state['first_name'] = 'Greg'
+    st.switch_page('pages/20_Citizen_Home.py')
 
 # ***************************************************
 # GRAPH SECTION — new addition below login UI
