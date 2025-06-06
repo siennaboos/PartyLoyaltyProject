@@ -1,14 +1,14 @@
 from flask import Flask, jsonify
 import requests
 import pandas as pd
-from process_votes import fetch_and_process_vote_data
+
 
 app = Flask(__name__)
 
 API_URL = "https://data.europarl.europa.eu/api/v2/meps"
-HEADERS   = {"accept": "application/ld+json"}
-
-app = Flask(__name__)
+HEADERS = {
+    "Accept": "application/json"
+}
 
 @app.route("/meps")
 def getMEPs():
@@ -66,91 +66,108 @@ def getEUs():
         return "bad"
     
 
-@app.route("/votes/<int:vote_id>")
-def getVotes(vote_id):
+@app.route("/mep-speeches")
+def get_mep_speech_profiles():
     try:
-        # Call HowTheyVote.eu API
-        url = f"https://howtheyvote.eu/api/votes/{vote_id}"
-        resp = requests.get(url)
-        data = resp.json()
+        BASE_URL = "https://data.europarl.europa.eu/api/v2/speeches"
 
-        if "votes" not in data or not data["votes"]:
-            return jsonify({"error": "No individual votes available for this vote_id"}), 404
+        headers = {
+            "Accept": "application/ld+json",
+            "User-Agent": "trayna-dev-0.1"
+        }
 
-        vote_records = []
+        params = {
+            "parliamentary-term": ["10"],
+            "activity-type": ["PLENARY_DEBATE_SPEECH"],
+            "sitting-date": "2024-01-01",
+            "sitting-date-end": "2024-12-31",
+            "limit": 50,
+            "offset": 0
+        }
 
-        for vote_entry in data["votes"]:
-            mep = vote_entry.get("mep", {})
-            mep_id_raw = mep.get("id", "")
-            mep_id = mep_id_raw.split("/")[-1]  # Extract ID number from "person/123"
-            vote_option = vote_entry.get("option", "Unknown")
+        all_speeches = []
+        max_pages = 5
+        for i in range(max_pages):
+            params["offset"] = i * params["limit"]
+            resp = requests.get(BASE_URL, headers=headers, params=params)
+            if resp.status_code != 200:
+                print(f"Error fetching speeches on page {i+1}")
+                break
 
-            if mep_id and vote_option:
-                vote_records.append({
-                    "mep_id": mep_id,
-                    "vote_id": vote_id,
-                    "individual_vote": vote_option
+            json_data = resp.json()
+            items = json_data.get("data", {}).get("items", [])
+            if not items:
+                break
+
+            for item in items:
+                all_speeches.append({
+                    "person_id": item.get("person", {}).get("id"),
+                    "person_name": item.get("person", {}).get("fullName"),
+                    "activity_type": item.get("activityType", {}).get("label", ""),
+                    "date": item.get("activity", {}).get("startDate")
                 })
 
-        votes_df = pd.DataFrame(vote_records)
+            time.sleep(1)
 
-        # Save to CSV
-        import os
+        # Aggregate
+        mep_stats = defaultdict(lambda: {"total": 0, "PLENARY_DEBATE_SPEECH": 0})
+        for s in all_speeches:
+            if not s["person_id"]:
+                continue
+            name = s["person_name"]
+            typ = s["activity_type"]
+            mep_stats[name]["total"] += 1
+            mep_stats[name][typ] += 1
+
+        df = pd.DataFrame([
+            {
+                "MEP": mep,
+                "Total Speeches": data["total"],
+                "Debate Speeches": data.get("PLENARY_DEBATE_SPEECH", 0)
+            }
+            for mep, data in mep_stats.items()
+        ])
+
         os.makedirs("output", exist_ok=True)
-        votes_df.to_csv(f"output/votes_{vote_id}.csv", index=False)
+        df.to_csv("output/mep_speech_profile.csv", index=False)
 
-        return jsonify(vote_records)
+        return jsonify(df.to_dict(orient="records"))
 
     except Exception as e:
-        print("Error in /votes route:", e)
         return jsonify({"error": str(e)}), 500
+
+
+base_url = "https://howtheyvote.eu/api/votes"
+all_votes = []
+
+# --- Paginate through results ---
+page = 1
+while True:
+    print(f"Fetching page {page}...")
+    resp = requests.get(base_url, params={"page": page})
+    data = resp.json()
     
+    results = data.get("results", [])
+    if not results:
+        break  # No more pages
 
+    for vote in results:
+        all_votes.append({
+            'vote_id': vote.get('id'),
+            'title': vote.get('title'),
+            'subject': vote.get('subject'),
+            'timestamp': vote.get('timestamp')[:10],
+            'url': vote.get('url')
+        })
+    
+    if data.get("next") is None:
+        break
+    page += 1
 
-import requests
-import pandas as pd
-import xml.etree.ElementTree as ET
-import os
-from flask import jsonify
-
-@app.route("/votes_real")
-def get_real_votes():
-    try:
-        # Get the first real vote from RegData
-        index_url = "https://www.europarl.europa.eu/RegData/rcv/rcv.json"
-        index_resp = requests.get(index_url)
-        index_data = index_resp.json()
-
-        # Grab first vote w/ XML
-        first_vote = index_data["rcvs"][0]
-        xml_url = first_vote["rollCallDataUrl"]
-        vote_id = first_vote["documentCode"]
-
-        # Parse XML vote file
-        xml_resp = requests.get(xml_url)
-        root = ET.fromstring(xml_resp.content)
-
-        votes = []
-        for vote in root.findall(".//vote"):
-            name = vote.get("name")
-            vote_value = vote.get("value")
-            if name and vote_value:
-                votes.append({
-                    "name": name.strip(),
-                    "vote_id": vote_id,
-                    "individual_vote": vote_value.strip()
-                })
-
-        votes_df = pd.DataFrame(votes)
-
-        # ✅ Save the real vote file
-        os.makedirs("output", exist_ok=True)
-        votes_df.to_csv("output/votes_real.csv", index=False)
-
-        return jsonify(votes_df.to_dict(orient="records"))
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+# --- Convert to DataFrame and Save ---
+df_leg_votes = pd.DataFrame(all_votes)
+df_leg_votes.to_csv("all_egislative_votes.csv", index=False)
+print("✅ Saved all_legislative_votes.csv with", len(df_leg_votes), "votes.")
     
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

@@ -2,9 +2,30 @@ import streamlit as st
 from streamlit_extras.app_logo import add_logo
 from modules.nav import SideBarLinks
 
+st.markdown("""
+    <style>
+    html, body, [class*="css"]  {
+        font-family: 'Georgia', serif !important;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #222;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Georgia', serif !important;
+    }
+
+    .block-container {
+        padding: 2rem 3rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 SideBarLinks()
 
+
 st.write("# About this App")
+
 
 st.markdown(
     """
