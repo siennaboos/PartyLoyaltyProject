@@ -46,7 +46,7 @@ def CohesionMonitorNav():
 
 def RecommenderNav():
     st.sidebar.page_link(
-        "pages/13_Recommender.py", label= "Party Recomender", icon="🖥️"
+        "pages/13_Recommender.py", label= "Party Recomender", icon="📈"
 )
 
 
@@ -56,6 +56,10 @@ def CitizenHomeNav():
 
 def MEPInfoNav():
     st.sidebar.page_link("pages/21_MEP_Party_Info.py", label="MEP & Party Info", icon="🏢")
+
+def CountryRecommenderNav():
+    st.sidebar.page_link("pages/22_Country_Recommendation.py", label="Country Explorer", icon="🌍")
+
 
 
 # --------------------------------Links Function -----------------------------------------------
@@ -96,6 +100,7 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "citizen":
             CitizenHomeNav()
             MEPInfoNav()
+            CountryRecommenderNav()
 
     # Always show the About page at the bottom of the list of links
     AboutPageNav()
