@@ -2,9 +2,10 @@
 import numpy as np
 import pandas as pd
 
-def make_full_df(filepath):
+# creating DataFrame
+def make_df(filepath):
     """
-    Creating full DataFrame of member info from CSV
+    Creating DataFrame from CSV
     
     Args:
         filepath (str): filepath for csv
@@ -15,49 +16,6 @@ def make_full_df(filepath):
     
     df = pd.read_csv(filepath)
     return df
-
-def get_metrics(df):
-    """
-    Returns DataFrame with just metrics for recommender, standardizing values from 0-1 scale
-    
-    Args:
-        df (DataFrame): full DataFrame of member info
-    
-    Returns:
-        df_metrics (DataFrame): DataFrame of standardized metrics for recommender
-    """
-    
-    # turning percent columns into decimals so all values are standardized - between 0 and 1
-    columns_to_decimals = ['percent_agree_current', 'percent_show_up', 'European People’s Party percentage', 'Renew Europe percentage',
-     'Progressive Alliance of Socialists and Democrats percentage',
-     'European Conservatives and Reformists percentage',
-     'Non-attached Members percentage',
-     'Europe of Sovereign Nations percentage',
-     'The Left in the European Parliament – GUE/NGL percentage',
-     'Greens/European Free Alliance percentage',
-     'Patriots for Europe percentage', 'Identity and Democracy percentage']
-    
-    df[columns_to_decimals] = df[columns_to_decimals] / 100
-
-    # stats to compare the MEPs
-    df_metrics = df[['party', 'percent_agree_current', 'percent_show_up', 'country', 'European People’s Party percentage']]
-    
-    return df_metrics
-
-def get_encoded_df(df):
-    """
-    Returns metrics DataFrame with 
-    
-    Args:
-        df (DataFrame): DataFrame with standardized metrics for filtering
-    
-    Returns:
-        df_encoded (DataFrame): DataFrame with one-hot encoded categorical metrics
-    """
-    
-    party_dummies = pd.get_dummies(df, columns=['party'], dtype='int', drop_first = True)
-    df_encoded = pd.get_dummies(party_dummies, columns=['country'], dtype='int', drop_first = True)
-    return df_encoded
 
 # getting vector for searching filters
 def get_filters(percent_agree_current, percent_attendance, my_party, my_party_percentage, new_candidate_party, new_candidate_country):
@@ -76,10 +34,12 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
         vector (np array): vector of inputted criteria
     """
     
+    # creating dictionary with inputted values
     nums = {'percent_agree_current': [percent_agree_current], 
            'percent_show_up': [percent_attendance], 
            f'{my_party} percentage': [my_party_percentage]}
 
+    # creating starter party dictionary
     parties = {'party_European Conservatives and Reformists': [0], 
            'party_European People’s Party': [0],
            'party_Greens/European Free Alliance': [0],
@@ -90,10 +50,12 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
            'party_Renew Europe': [0],
            'party_The Left in the European Parliament – GUE/NGL': [0]}
 
-    for key, val in parties.items():
+    # setting candidate party in dct
+    for key in parties:
         if key[key.index('_')+1:] == new_candidate_party:
             parties[key] = [1]
 
+    # creatng starter country dictionary
     countries = {'country_Belgium': [0], 
            'country_Bulgaria': [0], 
            'country_Croatia': [0], 
@@ -121,14 +83,17 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
            'country_Spain': [0],
            'country_Sweden': [0]}
 
-    for key, val in countries.items():
+    # setting candidate country in dct
+    for key in countries:
         if key[key.index('_')+1:] == new_candidate_country:
             countries[key] = [1]
 
+    # turning combined dictionary into a numpy vector 
     vector = np.array(pd.DataFrame(nums | parties | countries))
 
     return vector
 
+# getting top 10 recommended candidates which match the inputter's criteria
 def get_recommendations(full_df, encoded_df, filters_vec, party_name):
     """
     Returns top 10 MEPs matching inputter's criteria
@@ -143,43 +108,72 @@ def get_recommendations(full_df, encoded_df, filters_vec, party_name):
         recruits (DataFrame): top 10 MEPs to join the inputter's party 
     """
     
+    # initializing lists
     mep_dot_products = []
     mep_cosines = []
-        
-    temp_vec = np.array(encoded_df.iloc[0])
-    temp_vec.shape
     
+    # looping through encoded df of metrics
     for idx in range(len(encoded_df)):
-        temp_vec = np.array(encoded_df.iloc[idx]).reshape(-1, 1)
+        # turning row into a vector 
+        row_vec = np.array(encoded_df.iloc[idx]).reshape(-1, 1)
         
-        temp_dot = np.dot(filters_vec, temp_vec)
+        # dot product for filters and row vector
+        temp_dot = np.dot(filters_vec, row_vec)
+        # cosine similarity score
+        temp_cos = temp_dot/(np.linalg.norm(filters_vec) * np.linalg.norm(row_vec))
     
-        temp_cos = temp_dot/(np.linalg.norm(filters_vec) * np.linalg.norm(temp_vec))
-    
+        # appending data to the appropriate lists
         mep_dot_products.append(temp_dot[0])
         mep_cosines.append(temp_cos[0])
-
-    new_party_percentage = f'{party_name} percentage'
     
+    # creating dictionary of MEP information
     dict_mep = {'mep_id': full_df.id,
             'first_name': full_df.first_name,
             'last_name': full_df.last_name,
             'country': full_df.country,
             'current_party': full_df.party,
             'current_party_alignment': full_df.percent_agree_current,
-            f'{party_name} alignment': full_df[new_party_percentage],
+            f'{party_name} alignment': full_df[f'{party_name} percentage'],
             'attendance_rate': full_df.percent_show_up,
             'mep_dot_product': mep_dot_products,
             'mep_cosine': mep_cosines}
+    
+    # turning dictionary into DataFrame
     df_mep = pd.DataFrame(dict_mep)
     
     # this sorts the data by the cosine score
     sorted_df_mep = df_mep.sort_values(by='mep_cosine', ascending=False)
     
+    # filtering df and returning top 10 MEPs
     filtered_df = sorted_df_mep[sorted_df_mep['current_party'] != party_name]
     recruits = filtered_df.head(10)
 
     return recruits
+
+def get_dissenters(df, party_name):
+    """
+    Returns top 10 dissenting MEPs in the inputter's party
+    
+    Args:
+        df (DataFrame): full df of MEP information
+        party_name (str): inputter's party name
+    
+    Returns:
+        dissents (DataFrame): top 10 dissenting MEPs to the inputter's party
+    """
+    # filtering df to only members in the party who do not have 0% alignment rates
+    df = df[df['party'] == party_name]
+    df = df[df['percent_agree_current'] != 0]
+    
+    # filtering df to only features which will be returned
+    df = df[['id', 'first_name', 'last_name', 'percent_dissent_current']]
+
+    # getting highest dissenters, renaming columns
+    df = df.sort_values(by = 'percent_dissent_current', ascending = False)
+    df = df.rename(columns={'id': 'MEP ID', 'first_name': 'First Name', 'last_name': 'Last Name', 'percent_dissent_current': 'Dissent Rate'})
+    dissents = df.head(10)
+    
+    return dissents
 
 def main():
     """
@@ -192,12 +186,10 @@ def main():
         None
     """
     
-    df = make_full_df('members_cleaned.csv')
-    df_metrics = get_metrics(df)
-    df_encoded = get_encoded_df(df_metrics)
+    df = make_df('members_cleaned.csv')
+    df_encoded = make_df('metrics.csv')
 
-    # THIS IS WHERE THE PARTY LEADER PUTS IN THEIR CRITERIAS
-    # CHANGE THE ACTUAL FILTERS
+    # testing functions
     filters = get_filters(.70, .60, 'European People’s Party', .70, 'Non-attached Members', 'France')
     recs = get_recommendations(df, df_encoded, filters, 'European People’s Party')
 
