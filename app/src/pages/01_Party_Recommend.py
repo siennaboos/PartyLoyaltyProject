@@ -1,39 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
-import pandas as pd
-import streamlit as st
-from streamlit_extras.app_logo import add_logo
-import plotly.graph_objects as go
-from modules.nav import SideBarLinks
-
-# --- Global Styling ---
-st.markdown("""
-    <style>
-    html, body, [class*="css"]  {
-        font-family: 'Georgia', serif !important;
-        font-size: 16px;
-        line-height: 1.6;
-        color: #222;
-    }
-
-    h1, h2, h3, h4 {
-        font-family: 'Georgia', serif !important;
-    }
-
-    .block-container {
-        padding: 2rem 3rem;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# --- Sidebar ---
-SideBarLinks()
-
 import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
+
+st.title("Party Loyalty Recommender")
 
 st.title("Party Loyalty Recommender")
 

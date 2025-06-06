@@ -25,4 +25,3 @@ def generate_recommendation():
     }
 
     return jsonify(recommendation_result), 200
-
