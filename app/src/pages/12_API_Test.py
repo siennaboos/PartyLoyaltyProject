@@ -12,6 +12,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 st.markdown("""
     <style>
     html, body, [class*="css"]  {
@@ -88,3 +89,46 @@ st.pyplot(fig2)
 # Footer
 st.markdown("---")
 st.caption("Visualize party cohesion to track trends, dissent, and alignment across selected parties.")
+
+from flask import Flask, request, jsonify
+import pandas as pd
+import numpy as np
+import importlib.util
+import os
+
+# === Load recommender_cosine.py dynamically ===
+file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../ml-src/recommender_cosine.py"))
+
+spec = importlib.util.spec_from_file_location("recommender_cosine", file_path)
+rc = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(rc)
+
+# === Create Flask app ===
+app = Flask(__name__)
+
+# === Load model data ===
+csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../ml-src/members_cleaned.csv"))
+df = rc.make_full_df(csv_path)
+df_metrics = rc.get_metrics(df)
+df_encoded = rc.get_encoded_df(df_metrics)
+
+# === Define route ===
+@app.route('/recommend', methods=['POST'])
+def recommend():
+    data = request.get_json()
+
+    filters = rc.get_filters(
+        float(data["percent_agree_current"]),
+        float(data["percent_attendance"]),
+        data["my_party"],
+        float(data["my_party_percentage"]),
+        data["new_candidate_party"],
+        data["new_candidate_country"]
+    )
+
+    recs = rc.get_recommendations(df, df_encoded, filters, data["my_party"])
+    return jsonify(recs.to_dict(orient="records"))
+
+# === Start app ===
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
