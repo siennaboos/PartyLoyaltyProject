@@ -1,5 +1,4 @@
-from flask import Blueprint, jsonify, current_app, make_response, request
-
+from flask import Blueprint, jsonify, request, current_app, make_response
 from mysql.connector import Error
 
 from backend.db_connection import db
@@ -73,7 +72,7 @@ def update_mep_loyalty_score(partyID):
     current_app.logger.info('PUT /parties/<int:partyID>/score route entered')
     
     try:
-        data = request.json()
+        data = requests.json()
         
         required_fields = ["partyCohesionScore"]
         for field in required_fields:

@@ -8,8 +8,6 @@ from backend.db_connection import db
 from backend.routes.mep_routes.mep_routes import meps
 from backend.routes.users_routes.users_routes import users
 from backend.routes.party_routes.party_routes import parties
-from backend.routes.recommender_routes.recommendation_routes import recommendation
-
 
 
 def create_app():
@@ -49,7 +47,6 @@ def create_app():
     app.register_blueprint(meps, url_prefix="/m")
     app.register_blueprint(users, url_prefix="/u")
     app.register_blueprint(parties, url_prefix="/p")
-    app.register_blueprint(recommendation, url_prefix="/r")
 
     # Don't forget to return the app object
     return app
