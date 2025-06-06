@@ -2,10 +2,9 @@
 import numpy as np
 import pandas as pd
 
-# creating DataFrame
-def make_df(filepath):
+def make_full_df(filepath):
     """
-    Creating DataFrame from CSV
+    Creating full DataFrame of MEP info from CSV
     
     Args:
         filepath (str): filepath for csv
@@ -17,7 +16,50 @@ def make_df(filepath):
     df = pd.read_csv(filepath)
     return df
 
-# getting vector for searching filters
+def get_metrics(df, party_name):
+    """
+    Returns DataFrame with just metrics for recommender, standardizing values from 0-1 scale
+    
+    Args:
+        df (DataFrame): full DataFrame of member info
+        party_name (str): inputter's party
+    
+    Returns:
+        df_metrics (DataFrame): DataFrame of standardized metrics for recommender
+    """
+
+    # turning percent columns into decimals so all values are standardized - between 0 and 1
+    columns_to_decimals = ['percent_agree_current', 'percent_show_up', 'European People’s Party percentage', 'Renew Europe percentage',
+     'Progressive Alliance of Socialists and Democrats percentage',
+     'European Conservatives and Reformists percentage',
+     'Non-attached Members percentage',
+     'Europe of Sovereign Nations percentage',
+     'The Left in the European Parliament – GUE/NGL percentage',
+     'Greens/European Free Alliance percentage',
+     'Patriots for Europe percentage', 'Identity and Democracy percentage']
+    
+    df[columns_to_decimals] = df[columns_to_decimals] / 100
+
+    # stats to compare the MEPs
+    df_metrics = df[['party', 'percent_agree_current', 'percent_show_up', 'country', f'{party_name} percentage']]
+    
+    return df_metrics
+
+def get_encoded_df(df):
+   """
+   Returns metrics DataFrame with
+  
+   Args:
+       df (DataFrame): DataFrame with standardized metrics for filtering
+  
+   Returns:
+       df_encoded (DataFrame): DataFrame with one-hot encoded categorical metrics
+   """
+  
+   party_dummies = pd.get_dummies(df, columns=['party'], dtype='int', drop_first = True)
+   df_encoded = pd.get_dummies(party_dummies, columns=['country'], dtype='int', drop_first = True)
+   return df_encoded
+
 def get_filters(percent_agree_current, percent_attendance, my_party, my_party_percentage, new_candidate_party, new_candidate_country):
     """
     Returns a vector of criteria for recommender model
@@ -93,7 +135,6 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
 
     return vector
 
-# getting top 10 recommended candidates which match the inputter's criteria
 def get_recommendations(full_df, encoded_df, filters_vec, party_name):
     """
     Returns top 10 MEPs matching inputter's criteria
@@ -119,7 +160,7 @@ def get_recommendations(full_df, encoded_df, filters_vec, party_name):
         
         # dot product for filters and row vector
         temp_dot = np.dot(filters_vec, row_vec)
-        # cosine similarity score
+        # getting cosine similarity score
         temp_cos = temp_dot/(np.linalg.norm(filters_vec) * np.linalg.norm(row_vec))
     
         # appending data to the appropriate lists
@@ -141,12 +182,18 @@ def get_recommendations(full_df, encoded_df, filters_vec, party_name):
     # turning dictionary into DataFrame
     df_mep = pd.DataFrame(dict_mep)
     
-    # this sorts the data by the cosine score
+    # sorting data by cosine score
     sorted_df_mep = df_mep.sort_values(by='mep_cosine', ascending=False)
     
     # filtering df and returning top 10 MEPs
     filtered_df = sorted_df_mep[sorted_df_mep['current_party'] != party_name]
     recruits = filtered_df.head(10)
+    
+    # renaming columns for UI organization
+    recruits = recruits.rename(columns={'mep_id': 'MEP ID', 'first_name': 'First Name', 'last_name': 'Last Name', 'country': 'Country',
+                        'current_party': 'Current Party',
+                            'current_party_alignment': 'Current Party Alignment Rate', 
+                            'attendance_rate': 'Attendance Rate'})
 
     return recruits
 
@@ -175,6 +222,41 @@ def get_dissenters(df, party_name):
     
     return dissents
 
+def search_mep_metrics(df, mep_id):
+    """
+    Returns information for a single MEP
+    
+    Args:
+        df (DataFrame): full df of MEP information
+        mep_id (int): MEP the inputter wants info for
+    
+    Returns:
+        mep_info (DataFrame): a single df row with information about the specified MEP
+    """
+    # filtering df to only necessary info
+    df = df[['id', 'first_name', 'last_name', 'party', 'percent_agree_current', 'percent_dissent_current',
+       'percent_show_up', 'country', 'European People’s Party percentage',
+       'Renew Europe percentage',
+       'Progressive Alliance of Socialists and Democrats percentage',
+       'European Conservatives and Reformists percentage',
+       'Non-attached Members percentage',
+       'Europe of Sovereign Nations percentage',
+       'The Left in the European Parliament – GUE/NGL percentage',
+       'Greens/European Free Alliance percentage',
+       'Patriots for Europe percentage',
+       'Identity and Democracy percentage']]
+
+    # renaming columns for organization on UI
+    df = df.rename(columns={'id': 'MEP ID', 'first_name': 'First Name', 'last_name': 'Last Name', 
+                            'percent_agree_current': 'Current Party Alignment Rate', 
+                            'percent_dissent_current': 'Current Party Dissent Rate', 'percent_show_up': 'Attendance Rate',
+                            'country': 'Country'})
+
+    # getting and returning the MEP's info
+    mep_info = df[df['MEP ID'] == mep_id]
+    
+    return mep_info
+
 def main():
     """
     Main function
@@ -186,12 +268,22 @@ def main():
         None
     """
     
-    df = make_df('members_cleaned.csv')
-    df_encoded = make_df('metrics.csv')
+    # NOTE: party_name for get_metrics parameter, 
+    # first party name in get_filters parameters, 
+    # party_name for get_recommendations parameter,
+    # and party_name for get_dissenters parameter
+    # SHOULD ALL BE THE SAME!!
+
+    # members_cleaned.csv is data in a SQL table
+    df = make_full_df('/Users/Trayna/Desktop/PartyLoyaltyProject/ml-src/members_cleaned.csv')
+    df_metrics = get_metrics(df, 'Renew Europe')
+    df_encoded = get_encoded_df(df_metrics)
 
     # testing functions
-    filters = get_filters(.70, .60, 'European People’s Party', .70, 'Non-attached Members', 'France')
-    recs = get_recommendations(df, df_encoded, filters, 'European People’s Party')
+    filters = get_filters(.70, .60, 'Renew Europe', .70, 'Non-attached Members', 'France')
+    recs = get_recommendations(df, df_encoded, filters, 'Renew Europe')
+
+    dissenters = get_dissenters(df, 'Renew Europe')
 
 if __name__ == '__main__':
     main()
