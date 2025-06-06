@@ -37,7 +37,7 @@ if st.button('Party Recruitment Dashboard',
              use_container_width=True):
   st.switch_page('pages/01_Party_Recommend.py')
 
-if st.button('Party Cohesion Over Time', 
+if st.button('Party Cohesion Monitor', 
              type='primary',
              use_container_width=True):
   st.switch_page('pages/02_Cohesion_Monitor.py')

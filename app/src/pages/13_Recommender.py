@@ -47,6 +47,8 @@ def user_input_features():
 # get a data frame with the input features from the user
 df = user_input_features()
 
+st.title("Party Recommender")
+
 # show the exact values the user entered in a table.
 st.subheader('User Input parameters')
 st.write(df)

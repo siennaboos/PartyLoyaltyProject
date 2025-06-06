@@ -79,6 +79,7 @@ if st.button('Act as Camila Romero, a Political Journalist',
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'political_journalist'
     st.session_state['first_name'] = 'Camila'
+    logger.info("Logging in as the Political Journalist")
     st.switch_page('pages/10_Political_Journalist_Home.py')
 
 if st.button('Act as Greg Gerborg, a Citizen', 
@@ -87,6 +88,7 @@ if st.button('Act as Greg Gerborg, a Citizen',
     st.session_state['authenticated'] = True
     st.session_state['role'] = 'citizen'
     st.session_state['first_name'] = 'Greg'
+    logger.info("Logging in as a citizen")
     st.switch_page('pages/20_Citizen_Home.py')
 
 # ***************************************************
