@@ -30,68 +30,65 @@ st.markdown("""
 # --- Sidebar ---
 SideBarLinks()
 
-# --- Page Setup ---
-st.title("🧠 PartyLeader Recommender Dashboard")
-st.markdown("#### The party recommender model proposes these MEPs as possible recruits:")
+import streamlit as st
+import requests
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# --- Persona Context ---
-with st.container():
-    st.markdown("**Persona: Γιάννη Πούλος (Yanni Poulos)**  \n"
-                "_Party leader concerned about internal cohesion. Wants actionable insights._")
+st.title("Party Loyalty Recommender")
 
-# --- Input ---
-selected_party = st.selectbox("🔽 Select Your Party", ["EPP", "S&D", "Renew Europe", "The Left"])
-st.write(f"📊 Showing analysis for **{selected_party}**")
+# Input fields
+agree_current = st.slider("Current Party Agreement (%)", 0.0, 1.0, 0.7)
+attendance = st.slider("Attendance Rate (%)", 0.0, 1.0, 0.6)
+my_party = st.selectbox("Your Party", [
+    'European People’s Party', 'Renew Europe', 'Progressive Alliance of Socialists and Democrats',
+    'European Conservatives and Reformists', 'Non-attached Members', 'Europe of Sovereign Nations',
+    'The Left in the European Parliament – GUE/NGL', 'Greens/European Free Alliance', 
+    'Patriots for Europe', 'Identity and Democracy'
+])
+my_party_pct = st.slider("Your Party Loyalty (%)", 0.0, 1.0, 0.7)
+candidate_party = st.selectbox("Candidate's Party", [
+    'European People’s Party', 'Renew Europe', 'Progressive Alliance of Socialists and Democrats',
+    'European Conservatives and Reformists', 'Non-attached Members', 'Europe of Sovereign Nations',
+    'The Left in the European Parliament – GUE/NGL', 'Greens/European Free Alliance', 
+    'Patriots for Europe', 'Identity and Democracy'
+])
+candidate_country = st.selectbox("Candidate's Country", [
+    'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia', 'Finland', 'France',
+    'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta',
+    'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden'
+])
 
-# --- Recruits Table ---
-st.markdown("### 🔍 Top 5 Recruitment Candidates")
+if st.button("Get Recommendations"):
+    json_data = {
+        "percent_agree_current": float(agree_current),
+        "percent_attendance": float(attendance),
+        "my_party": str(my_party),
+        "my_party_percentage": float(my_party_pct),
+        "new_candidate_party": str(candidate_party),
+        "new_candidate_country": str(candidate_country)
+    }
 
-recruit_df = pd.DataFrame({
-    "MEP Name": ["Lukas Werner", "Clara Johansson", "Mateo Rossi", "Eva Schmidt", "Anouk Dubois"],
-    "Current Party": ["Greens/EFA", "Renew Europe", "ECR", "Greens/EFA", "The Left"],
-    "% Dissent with Your Party": [12, 9, 15, 11, 10],
-    "% Dissent with Their Party": [35, 28, 40, 30, 38],
-    "Recent Votes With You": [7, 9, 5, 8, 6]
-})
+    response = requests.post("http://web-api:4000/r/generate", json=json_data)
 
-st.dataframe(recruit_df, use_container_width=True)
+    if response.status_code == 200:
+        st.success("✅ Recommendations:")
+        st.dataframe(response.json())
+    else:
+        st.error("❌ Something went wrong: " + response.text)
 
-# --- MEP Detail ---
-st.markdown("### 👤 Detailed MEP Analysis")
+    if response.status_code == 200:
+        recs = pd.DataFrame(response.json())
 
-selected_mep = st.selectbox("Select a Candidate for Deep Dive", recruit_df["MEP Name"])
-mep_row = recruit_df[recruit_df["MEP Name"] == selected_mep].iloc[0]
+        st.write("### Top Recommended MEPs")
+        st.dataframe(recs)
 
-with st.container():
-    st.markdown(f"#### 🧾 Analysis for **{selected_mep}**")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"**Current Party:** {mep_row['Current Party']}")
-        st.markdown(f"**% Dissent with Their Own Party:** {mep_row['% Dissent with Their Party']}%")
-    with col2:
-        st.markdown(f"**% Dissent with Your Party:** {mep_row['% Dissent with Your Party']}%")
-        st.markdown(f"**Recent Votes With You:** {mep_row['Recent Votes With You']}")
-
-    # --- Plotly Chart ---
-    aligned = mep_row['Recent Votes With You']
-    dissenting = 10 - aligned
-
-    fig = go.Figure(data=[
-        go.Bar(name='Aligned', x=["Recent Votes"], y=[aligned], marker_color='green'),
-        go.Bar(name='Dissenting', x=["Recent Votes"], y=[dissenting], marker_color='crimson')
-    ])
-    fig.update_layout(
-        barmode='stack',
-        height=350,
-        title="Recent Voting Behavior",
-        yaxis_title="Number of Votes",
-        template="plotly_white",
-        margin=dict(l=10, r=10, t=30, b=20),
-        showlegend=True
-    )
-    st.plotly_chart(fig, use_container_width=True)
-
-# --- Footer ---
-st.markdown("---")
-st.caption("🧭 Use this tool to explore MEPs who may be disloyal or aligned with your party.")
+        st.write("### Cosine Similarity of Top 10 MEPs")
+        fig, ax = plt.subplots()
+        ax.barh(recs["first_name"] + " " + recs["last_name"], recs["mep_cosine"])
+        ax.invert_yaxis()
+        ax.set_xlabel("Cosine Similarity")
+        ax.set_title("Top MEP Matches")
+        st.pyplot(fig)
+    else:
+        st.error("Something went wrong with the backend call.")
