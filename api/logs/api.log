@@ -1,0 +1,6 @@
+2025-05-21 14:11:45,555 INFO: API startup [in /apicode/backend/rest_entry.py:89]
+2025-05-21 14:11:45,556 INFO: current_app(): starting the database connection [in /apicode/backend/rest_entry.py:42]
+2025-05-21 14:11:45,556 INFO: create_app(): registering blueprints with Flask app object. [in /apicode/backend/rest_entry.py:47]
+2025-05-21 14:11:45,751 INFO: API startup [in /apicode/backend/rest_entry.py:89]
+2025-05-21 14:11:45,752 INFO: current_app(): starting the database connection [in /apicode/backend/rest_entry.py:42]
+2025-05-21 14:11:45,753 INFO: create_app(): registering blueprints with Flask app object. [in /apicode/backend/rest_entry.py:47]
