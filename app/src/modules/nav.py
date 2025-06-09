@@ -58,7 +58,7 @@ def MEPInfoNav():
     st.sidebar.page_link("pages/21_MEP_Party_Info.py", label="MEP & Party Info", icon="🏢")
 
 def CountryRecommenderNav():
-    st.sidebar.page_link("pages/22_Country_Recommendation.py", label="Country Explorer", icon="🌍")
+    st.sidebar.page_link("pages/22_MEP_Match.py", label="Country Explorer", icon="🌍")
 
 
 
