@@ -28,23 +28,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title(f"Welcome USAID Worker, {st.session_state['first_name']}.")
+st.title(f"Welcome Citizen, {st.session_state['first_name']}.")
 st.write('')
 st.write('')
 st.write('### What would you like to do today?')
 
-if st.button('Predict Value Based on Regression Model', 
+if st.button('MEP & Political Party Information', 
              type='primary',
              use_container_width=True):
-  st.switch_page('pages/11_Prediction.py')
+  st.switch_page('pages/21_MEP_Party_Info.py')
 
-if st.button('Party Cohesion Monitor', 
+if st.button('Country Explorer', 
              type='primary',
              use_container_width=True):
-  st.switch_page('pages/12_API_Test.py')
-
-if st.button("View Classification Demo",
-             type='primary',
-             use_container_width=True):
-  st.switch_page('pages/13_Classification.py')
-  
+  st.switch_page('pages/22_Country_Recommendation.py')
