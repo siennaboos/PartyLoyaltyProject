@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 
 st.title("Party Loyalty Recommender")
 
-st.title("Party Loyalty Recommender")
-
 # Input fields
 agree_current = st.slider("Current Party Agreement (%)", 0.0, 1.0, 0.7)
 attendance = st.slider("Attendance Rate (%)", 0.0, 1.0, 0.6)
