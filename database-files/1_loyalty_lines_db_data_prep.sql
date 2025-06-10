@@ -5,31 +5,31 @@ INSERT INTO political_party (partyName)
 VALUES ("European People’s Party", "The EPP is the largest political group and represents center-right, Christian democratic, and pro-European values. It supports a strong EU, market economy, and conservative social policies.");
 
 INSERT INTO political_party (partyName)
-VALUES ("Progressive Alliance of Socialists and Democrats");
+VALUES ("Progressive Alliance of Socialists and Democrats", "The S&D group represents social democratic and center-left parties focused on workers' rights, social justice, and a fairer Europe. It supports progressive taxation and a stronger welfare state.");
 
 INSERT INTO political_party (partyName)
 VALUES ("Patriots for Europe");
 
 INSERT INTO political_party (partyName)
-VALUES ("European Conservatives and Reformists");
+VALUES ("European Conservatives and Reformists", "ECR combines moderate right-wing, anti-federalist parties that support reforming the EU to respect national sovereignty. Less radical than ID, but still critical of EU overreach.");
 
 INSERT INTO political_party (partyName)
-VALUES ("Renew Europe");
+VALUES ("Renew Europe", "Renew Europe is a pro-European liberal group that promotes free markets, digital innovation, civil liberties, and EU reform. It emerged from a coalition including Emmanuel Macron's movement.");
 
 INSERT INTO political_party (partyName)
-VALUES ("Greens/European Free Alliance");
+VALUES ("Greens/European Free Alliance", "This group unites green parties and regionalist/pro-autonomy movements. It prioritizes environmental issues, human rights, and social equality.");
 
 INSERT INTO political_party (partyName)
-VALUES ("The Left in the European Parliament - GUE/NGL");
+VALUES ("The Left in the European Parliament - GUE/NGL", "The Left represents anti-capitalist, democratic socialist, and communist parties. It supports wealth redistribution, social justice, and strong workers' rights, often opposing neoliberal EU policies.");
 
 INSERT INTO political_party (partyName)
 VALUES ("Europe of Sovereign Nations");
 
 INSERT INTO political_party (partyName)
-VALUES ("Non-attached Members");
+VALUES ("Non-attached Members", "These MEPs do not belong to any official group. They may include independents, members of new or radical parties, or those excluded from other groups.");
 
 INSERT INTO political_party(partyName)
-VALUES ("Identity and Democracy");
+VALUES ("Identity and Democracy", "ID includes nationalist, right-wing populist, and Eurosceptic parties. It is critical of EU centralization and immigration.");
 
 -- PREPARE USER ROLES
 INSERT INTO userRole(userRoleID, userRoleName)
