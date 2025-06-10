@@ -2,14 +2,24 @@ import streamlit as st
 import requests
 import pandas as pd
 import matplotlib.pyplot as plt
+from modules.nav import SideBarLinks
+
+st.markdown("""
+    <style>
+    .stSlider > div {
+        width: 300px;  
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("Party Loyalty Recommender")
 
-st.title("Party Loyalty Recommender")
+SideBarLinks()
 
 # Input fields
-agree_current = st.slider("Current Party Agreement (%)", 0.0, 1.0, 0.7)
+agree_current = st.slider("Current Party Agreement (%)", 0, 100, 79, 1)
 attendance = st.slider("Attendance Rate (%)", 0.0, 1.0, 0.6)
+
 my_party = st.selectbox("Your Party", [
     'European People’s Party', 'Renew Europe', 'Progressive Alliance of Socialists and Democrats',
     'European Conservatives and Reformists', 'Non-attached Members', 'Europe of Sovereign Nations',
