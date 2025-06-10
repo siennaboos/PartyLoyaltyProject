@@ -7,7 +7,8 @@ USE loyalty_lines;
 CREATE TABLE IF NOT EXISTS political_party (
     partyID INT AUTO_INCREMENT PRIMARY KEY,
     partyCohesionScore INT,
-    partyName VARCHAR(255)
+    partyName VARCHAR(255),
+    partyDescription TEXT
 );
 
 CREATE TABLE IF NOT EXISTS mep (

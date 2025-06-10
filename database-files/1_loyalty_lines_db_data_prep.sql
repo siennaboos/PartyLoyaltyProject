@@ -1,28 +1,28 @@
 USE loyalty_lines;
 
 -- PREPARE POLIICAL PARTIES
-INSERT INTO political_party (partyName)
-VALUES ("Group of the European People's Party");
+INSERT INTO political_party (partyName, partyDescription)
+VALUES ("Group of the European People's Party", "The EPP is the largest political group and represents center-right, Christian democratic, and pro-European values. It supports a strong EU, market economy, and conservative social policies.");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("Group of the Progressive Alliance of Socialists and Democrats in the European Parliament");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("Patriots for Europe Group");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("European Conservatives and Reformists Group");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("Renew Europe Group");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("Group of the Greens/European Free Alliance");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("The Left group in the European Parliament");
 
-INSERT INTO political_party (partyName)
+INSERT INTO political_party (partyName, partyDescription)
 VALUES ("Europe of Sovereign Nations Group");
 
 -- PREPARE USER ROLES
