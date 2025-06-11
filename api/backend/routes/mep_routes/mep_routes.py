@@ -9,7 +9,7 @@ meps = Blueprint("meps", __name__)
 def get_all_meps():
     current_app.logger.info('GET /meps route entered')
     query = '''
-        SELECT mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID
+        SELECT mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID, photoURL
         FROM mep;
     '''
     cursor = db.get_db().cursor()

@@ -33,24 +33,20 @@ loyalty_scores = [76.2, 93.5, 87.0, 83.0, 69.7, 82.1, 74.5, 84.8, 66.5, 78.9, 89
 voter_turnout = [70.6, 73.7, 51.9, 74.3, 56.8, 61.5, 79.1, 66.2, 67.4, 85.0, 78.8, 60.5, 69.2,
                  72.6, 75.1, 61.7, 59.4, 68.0, 54.3, 80.2, 60.3, 77.9, 63.2, 65.5, 70.9, 66.3, 88.1]
 
-science_alignment = [0.80, 0.96, 0.54, 0.60, 0.52, 0.76, 0.88, 0.77, 0.83, 0.90, 0.95, 0.65, 0.71,
-                     0.85, 0.91, 0.63, 0.58, 0.81, 0.74, 0.93, 0.67, 0.79, 0.70, 0.69, 0.84, 0.87, 0.92]
 
 df = pd.DataFrame({
     "Country": countries,
     "ISO": iso_codes,
     "Loyalty": loyalty_scores,
     "Turnout": voter_turnout,
-    "Science": science_alignment
 })
 
 # --- USER SELECTION ---
 st.markdown("### 🧠 What Do You Care About Most?")
-topic = st.radio("Choose a political issue:", ["Science", "Turnout", "Loyalty"], index=0)
+topic = st.radio("Choose a political issue:", ["Turnout", "Loyalty"], index=0)
 
 # --- SCORING MODEL ---
 score_weights = {
-    "Science": df["Science"],
     "Turnout": df["Turnout"] / 100,
     "Loyalty": df["Loyalty"] / 100
 }
@@ -74,7 +70,7 @@ st.plotly_chart(fig_map, use_container_width=True)
 
 # --- DASHBOARD CHARTS ---
 st.markdown("### 📊 Country-Level Breakdown")
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("**🧭 Party Loyalty**")
@@ -87,12 +83,6 @@ with col2:
     fig_turnout = px.bar(df, x="Country", y="Turnout", color="Turnout", color_continuous_scale="Blues")
     fig_turnout.update_layout(height=300, margin=dict(t=30))
     st.plotly_chart(fig_turnout, use_container_width=True)
-
-with col3:
-    st.markdown("**🧪 Science Alignment**")
-    fig_science = px.line(df, x="Country", y="Science", markers=True, line_shape='spline')
-    fig_science.update_layout(height=300, yaxis_range=[0, 1], margin=dict(t=30))
-    st.plotly_chart(fig_science, use_container_width=True)
 
 # --- FOOTER ---
 st.markdown("---")

@@ -1,64 +1,42 @@
-# import requests
+import pandas as pd
 
-# meps = requests.get('https://data.europarl.europa.eu/api/v2/meps?format=application%2Fld%2Bjson&offset=0')
-# # print(meps)
+csv_path = 'ml-src/members_cleaned.csv'
 
-# try:
-#     meps = meps.json()
-# except ValueError:
-#     print("bad")
-#     print(meps.text[:500])
+df = pd.read_csv(csv_path)
 
-
-# print(f"retrieved {len(meps['data'])}MEPs")
-
-# for mep in meps['data']:
-#     mep_id = mep['id'].split("/")[1] 
-
-#     in_depth = requests.get(f'https://data.europarl.europa.eu/api/v2/meps/{mep_id}?format=application%2Fld%2Bjson').json()
-#     mep_specifics = in_depth['data'][0]
-
-    
-#     print("rerieved in depth info")
-#     eu_group_id = None
-
-#     for membership in mep_specifics["hasMembership"]:
-#         if membership.get("membershipClassification") == "def/ep-entities/EU_POLITICAL_GROUP":
-#             eu_group_id = membership.get("organization")
-#             break
-
-    
+print()
+mep_data = pd.concat([df.iloc[:,:5], df['country']], axis=1)
+mep_data = pd.concat([mep_data, df['percent_agree_current']], axis=1)
+print(mep_data)
 
 
-#     print("\n\n\n")
+with open('output.txt', 'w', encoding='utf-8') as f:
+    for index, row in mep_data.iterrows():
+        
+        party = ""
+        if row['party'][0:15] + row['party'][16:] == "European Peoples Party":
+            party = 1
+        elif row['party'] == "Progressive Alliance of Socialists and Democrats":
+            party = 2
+        elif row['party'] == "European Conservatives and Reformists":
+            party = 4
+        elif row['party'] == "Patriots for Europe":
+            party = 3
+        elif row['party'] == "Renew Europe":
+            party = 5
+        elif row['party'] == "Greens/European Free Alliance":
+            party = 6
+        elif row['party'] == "The Left in the European Parliament – GUE/NGL":
+            party = 7
+        elif row['party'] == "Europe of Sovereign Nations":
+            party = 8      
+        elif row['party'] == "Non-attached Members":
+            party = 9
+        elif row['party'] == "Identity and Democracy":
+            party = 11
+        else:
+            print(row['party'].strip()) 
+            
 
-# # @app.route("/meps")
-# # def getMEPs():
-# #     try:
-# #         resp = requests.get("https://data.europarl.europa.eu/api/v2/meps", headers=HEADERS)
-# #         data = resp.json()
-
-# #         meps_raw = data.get("data", [])
-# #         mep_records = []
-
-# #         for mep in meps_raw:
-# #             if not isinstance(mep, dict):
-# #                 continue
-
-# #             mep_id_raw = mep.get("id", "")
-# #             mep_id = mep_id_raw.split("/")[-1]
-# #             name = mep.get("label", "")
-# #             european_group = mep.get("politicalGroup", {}).get("label", "") 
-
-# #             if mep_id and name:
-# #                 mep_records.append({
-# #                     "mep_id": mep_id,
-# #                     "name": name,
-# #                     "country": country_of_representation
-# #                     "european_group": european_group
-# #                 })
-
-# #         meps_df = pd.DataFrame(mep_records)
-# #         meps_df.to_csv("meps_ref.csv", index=False)
-
-# #         return jsonify(mep_records)
+        f.write(f"INSERT INTO mep(mepID, name, countryOfOrigin, loyaltyScore, partyID, photoURL) VALUES({row['id']}, \"{row['first_name']} {row['last_name']}\", \"{row['country']}\", {str(row['percent_agree_current'])[0:4]}, {party}, \"https://www.europarl.europa.eu/mepphoto/{row['id']}.jpg\");\n")
+        
