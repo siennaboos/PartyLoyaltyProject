@@ -87,7 +87,7 @@ fig = px.bar(
     chart_df,
     x="Category",
     y="Percentage",
-    color="Category",``
+    color="Category",
     color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
     labels={"Percentage": "% of Votes"},
 )
