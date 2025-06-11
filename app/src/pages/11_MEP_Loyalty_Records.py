@@ -1,105 +1,90 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 import streamlit as st
 import requests
-import streamlit as st
-import pandas as pd
-import os
-import sys
-import streamlit as st
 import pandas as pd
 import plotly.express as px
-
 from modules.nav import SideBarLinks
+
+# Setup
 SideBarLinks()
-
-# ----------------------------
-# Page Setup
-# ----------------------------
-
 st.title("📄 MEP Party Loyalty Records")
 st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
 
 # ----------------------------
-# Load MEP Data via API
+# Load MEPs
 # ----------------------------
-resp = requests.get("http://web-api:4000/m/meps")
-
-meps = None
-if resp.status_code == 200:
-    meps = resp.json()
-else:
-    st.error("Failed to fetch MEP data.")
+response = requests.get("http://web-api:4000/m/meps")
+if response.status_code != 200:
+    st.error("Failed to load MEPs.")
     st.stop()
 
-# ----------------------------
-# Build MEP DataFrame
-# ----------------------------
-mep_df = pd.DataFrame()
+meps = response.json()
 
+# ----------------------------
+# Build DataFrame with party info
+# ----------------------------
+rows = []
 for mep in meps:
-    # Get party name using mepID
-    party_resp = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party')
-    if party_resp.status_code == 200:
-        party = party_resp.json().get("partyName", "Unknown")
-    else:
-        party = "Unknown"
+    party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
+    party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
 
-    # Append row to DataFrame
-    row = pd.DataFrame([{
+    rows.append({
         "mepID": mep["mepID"],
         "name": mep["name"],
-        "Party": party,
-        "Country": mep["countryOfOrigin"],
-        "Overall Loyalty Score": mep["loyaltyScore"],
-        "photoURL": mep.get("photoURL"),
-        "% Agreed": 72,           # Placeholder values
-        "% Dissented": 20,
-        "% Did Not Vote": 8
-    }])
-    mep_df = pd.concat([mep_df, row], ignore_index=True)
+        "party": party_name,
+        "country": mep["countryOfOrigin"],
+        "loyaltyScore": mep["loyaltyScore"],
+        "photoURL": mep.get("photoURL")
+    })
+
+df = pd.DataFrame(rows)
 
 # ----------------------------
-# Select MEP from dropdown
+# MEP Selection
 # ----------------------------
-selected_mep = st.selectbox("Select MEP", mep_df["name"])
-selected_row = mep_df[mep_df["name"] == selected_mep].iloc[0]
+selected_name = st.selectbox("Select MEP", df["name"])
+selected = df[df["name"] == selected_name].iloc[0]
 
 # ----------------------------
-# Display Photo and Info
+# Display Headshot & Details
 # ----------------------------
 col1, col2 = st.columns([1, 3])
-
 with col1:
-    if selected_row["photoURL"]:
-        st.image(selected_row["photoURL"], caption=selected_mep, width=160)
+    if selected["photoURL"]:
+        st.image(selected["photoURL"], width=160, caption=selected_name)
     else:
-        st.text("No photo available.")
+        st.write("No photo available.")
 
 with col2:
-    st.subheader(selected_mep)
-    st.markdown(f"**Party**: {selected_row['Party']}")
-    st.markdown(f"**Country**: {selected_row['Country']}")
-    st.markdown(f"**Overall Loyalty Score**: {selected_row['Overall Loyalty Score']}%")
+    st.subheader(selected_name)
+    st.markdown(f"**Party**: {selected['party']}")
+    st.markdown(f"**Country**: {selected['country']}")
+    st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
 
 # ----------------------------
-# Plotly Bar Chart for Voting Breakdown
+# Fetch Score Breakdown from API
+# ----------------------------
+score_resp = requests.get(f"http://web-api:4000/m/mep/{selected['mepID']}/score")
+if score_resp.status_code == 200:
+    score_data = score_resp.json()
+    agreed = float(score_data.get("agreed", 0))
+    dissented = float(score_data.get("dissented", 0))
+    not_voted = float(score_data.get("notVoted", 0))
+else:
+    st.warning("Voting breakdown unavailable.")
+    agreed, dissented, not_voted = 0, 0, 0
+
+# ----------------------------
+# Voting Breakdown Chart
 # ----------------------------
 st.markdown("### Voting Record Breakdown")
 
-vote_data = pd.DataFrame({
+chart_df = pd.DataFrame({
     "Category": ["Agreed", "Dissented", "Did Not Vote"],
-    "Percentage": [
-        selected_row["% Agreed"],
-        selected_row["% Dissented"],
-        selected_row["% Did Not Vote"]
-    ]
+    "Percentage": [agreed, dissented, not_voted]
 })
 
 fig = px.bar(
-    vote_data,
+    chart_df,
     x="Category",
     y="Percentage",
     color="Category",

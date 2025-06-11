@@ -21,3 +21,9 @@ if st.button('Party Cohesion Monitor',
              type='primary',
              use_container_width=True):
   st.switch_page('pages/02_Cohesion_Monitor.py')
+
+if st.button('Coalition Builder', 
+             type='primary',
+             use_container_width=True):
+  st.switch_page('pages/03_Graph.py')
+
