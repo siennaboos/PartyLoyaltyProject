@@ -46,7 +46,6 @@ selected = df[df["name"] == selected_name].iloc[0]
 
 # ----------------------------
 # Display Headshot & Details
->>>>>>> trayna-branch-recovered
 # ----------------------------
 col1, col2 = st.columns([1, 3])
 with col1:
@@ -86,10 +85,9 @@ chart_df = pd.DataFrame({
 
 fig = px.bar(
     chart_df,
->>>>>>> trayna-branch-recovered
     x="Category",
     y="Percentage",
-    color="Category",
+    color="Category",``
     color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
     labels={"Percentage": "% of Votes"},
 )
