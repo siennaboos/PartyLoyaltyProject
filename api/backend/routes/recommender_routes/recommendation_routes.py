@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
 import pandas as pd
 import numpy as np
+from backend.ml_models import new_recommender_cosine as recommender
+import os
 from backend.ml_models.recommender_cosine import (
     make_df, get_metrics, get_encoded_df,
     get_filters, get_recommendations
