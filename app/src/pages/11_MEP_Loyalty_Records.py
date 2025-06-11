@@ -56,7 +56,11 @@ if resp.status_code == 200:
 
 # # MEP Data – mock or real
 mep_df = pd.DataFrame()
+photo_url = "" 
+
 for mep in meps:
+    #st.write(mep)
+    photo_url = mep["photoURL"]
     party = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party').json()["partyName"]
 
     df2 = pd.DataFrame([{"name": mep["name"],
@@ -79,7 +83,6 @@ row = mep_df[mep_df["name"] == selected_mep].iloc[0]
 
 # Match photo by MEP ID
 # photo_url = photo_df.loc[photo_df["mepID"] == row["mepID"], "photo_url"].values[0]
-photo_url = "https://www.europarl.europa.eu/mepphoto/96834.jpg" # temporarily hardcoded
 
 # Layout for photo + stats
 col1, col2 = st.columns([1, 3])
