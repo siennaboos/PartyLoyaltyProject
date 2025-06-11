@@ -3,14 +3,12 @@ logger = logging.getLogger(__name__)
 import streamlit as st
 from modules.nav import SideBarLinks
 import requests
+import pandas as pd
 
-st.set_page_config(layout = 'wide')
+st.set_page_config(layout = 'wide') 
 
 SideBarLinks()
 
-import pandas as pd
-import plotly.express as px
-import requests
 
 st.title("🤝 Compare Two MEPs")
 

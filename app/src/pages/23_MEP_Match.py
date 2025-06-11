@@ -6,6 +6,10 @@ st.set_page_config(layout="wide")
 st.title("📬 Find Your MEP Match")
 st.markdown("Answer a few questions to get MEP recommendations aligned with your values.")
 
+
+
+
+
 # ---------- Helper to load image from mepID ----------
 def render_mep_image_from_id(mep_id, fallback_caption="No photo available"):
     if mep_id:
@@ -27,7 +31,7 @@ EU_COUNTRIES = [
 ]
 
 PARTY_GROUPS = [
-    "European People’s Party",
+    "European People's Party",
     "Progressive Alliance of Socialists and Democrats",
     "Renew Europe",
     "Greens/European Free Alliance",

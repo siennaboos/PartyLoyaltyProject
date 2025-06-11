@@ -71,6 +71,13 @@ if score_resp.status_code == 200:
     agreed = float(score_data.get("agreed", 0))
     dissented = float(score_data.get("dissented", 0))
     not_voted = float(score_data.get("notVoted", 0))
+
+
+
+
+
+
+    
 else:
     st.warning("Voting breakdown unavailable.")
     agreed, dissented, not_voted = 0, 0, 0
