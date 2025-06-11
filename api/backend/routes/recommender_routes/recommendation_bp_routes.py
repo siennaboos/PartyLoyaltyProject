@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 import pandas as pd
 import numpy as np
+import sqlite3
 from backend.ml_models import new_recommender_cosine as recommender
 import os
 
@@ -53,8 +54,3 @@ def recommend():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
-
-
-@recommender_bp.route('/test', methods=['GET'])
-def test_route():
-    return jsonify({'message': 'API is working!'})

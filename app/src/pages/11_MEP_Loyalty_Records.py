@@ -63,36 +63,38 @@ with col2:
 # ----------------------------
 # Fetch Score Breakdown from API
 # ----------------------------
-score_resp = requests.get(f"http://web-api:4000/m/mep/{selected['mepID']}/score")
-if score_resp.status_code == 200:
-    score_data = score_resp.json()
-    agreed = float(score_data.get("agreed", 0))
-    dissented = float(score_data.get("dissented", 0))
-    not_voted = float(score_data.get("notVoted", 0))
-else:
-    st.warning("Voting breakdown unavailable.")
-    agreed, dissented, not_voted = 0, 0, 0
+response = requests.get("http://web-api:4000/b/alignment-dissent")  # update route if different
 
-# ----------------------------
-# Voting Breakdown Chart
-# ----------------------------
-st.markdown("### Voting Record Breakdown")
+if response.status_code != 200:
+    st.error("Failed to load alignment data.")
+    st.stop()
 
-chart_df = pd.DataFrame({
-    "Category": ["Agreed", "Dissented", "Did Not Vote"],
-    "Percentage": [agreed, dissented, not_voted]
-})
+data = response.json()  # Expecting list of dicts like {"party": ..., "alignment": ..., "dissent": ...}
 
-fig = px.bar(
-    chart_df,
-    x="Category",
-    y="Percentage",
-    color="Category",
-    color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
-    labels={"Percentage": "% of Votes"},
-)
-fig.update_layout(yaxis_range=[0, 100], showlegend=False)
-st.plotly_chart(fig)
+df = pd.DataFrame(data)
+
+# Filter for selected_parties
+df = df[df["party"].isin(selected_parties)]
+
+# -----------------------------------------
+# Plot bar chart
+# -----------------------------------------
+with chart_col2:
+    st.markdown("#### 📊 Alignment vs Dissent")
+
+    fig_bar = go.Figure(data=[
+        go.Bar(name='Alignment', x=df['party'], y=df['alignment'], marker_color='green'),
+        go.Bar(name='Dissent', x=df['party'], y=df['dissent'], marker_color='crimson')
+    ])
+    fig_bar.update_layout(
+        barmode='group',
+        height=350,
+        margin=dict(l=10, r=10, t=30, b=20),
+        yaxis_title="% of Votes",
+        template="plotly_white",
+        legend_title="Vote Type"
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
 
 # ----------------------------
 # Footer
