@@ -12,7 +12,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Party Loyalty Recommender")
+from modules.nav import SideBarLinks
+SideBarLinks()
 
 SideBarLinks()
 

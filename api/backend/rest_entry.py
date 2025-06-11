@@ -48,7 +48,8 @@ def create_app():
     app.register_blueprint(meps, url_prefix="/m")
     app.register_blueprint(users, url_prefix="/u")
     app.register_blueprint(parties, url_prefix="/p")
-    app.register_blueprint(recommendation, url_prefix="/r")
+    app.register_blueprint(recommendation, url_prefix='/r')
+
 
     # Don't forget to return the app object
     return app

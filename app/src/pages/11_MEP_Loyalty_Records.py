@@ -1,112 +1,89 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 import streamlit as st
 import requests
-import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+import plotly.express as px
 from modules.nav import SideBarLinks
+
+# Setup
 SideBarLinks()
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import os
-
-st.markdown("""
-    <style>
-    html, body, [class*="css"]  {
-        font-family: 'Georgia', serif !important;
-        font-size: 16px;
-        line-height: 1.6;
-        color: #222;
-    }
-
-    h1, h2, h3, h4 {
-        font-family: 'Georgia', serif !important;
-    }
-
-    .block-container {
-        padding: 2rem 3rem;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-
-# Title and Instructions
 st.title("📄 MEP Party Loyalty Records")
-st.markdown("Select an MEP to see their loyalty breakdown and photo.")
 
-# Load Photo CSV – place the CSV near this script or adjust accordingly
-photo_df = pd.read_csv("mep_photo.csv")  # <-- move here if needed
+st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
 
+# Load MEPs
+response = requests.get("http://web-api:4000/m/meps")
+if response.status_code != 200:
+    st.error("Failed to load MEPs.")
+    st.stop()
 
-# call backend api and get mep info
-resp = requests.get("http://web-api:4000/m/meps")
+meps = response.json()
 
-meps = None
-if resp.status_code == 200:
-    meps = resp.json()
-
-
-# # MEP Data – mock or real
-mep_df = pd.DataFrame()
-photo_url = "" 
-
+# Build DataFrame with party info
+rows = []
 for mep in meps:
-    #st.write(mep)
-    photo_url = mep["photoURL"]
-    party = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party').json()["partyName"]
+    party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
+    party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
 
-    df2 = pd.DataFrame([{"name": mep["name"],
-                          "Party": party,
-                        "Country": mep["countryOfOrigin"],
-                        "Overall Loyalty Score": mep["loyaltyScore"],
-                        "% Agreed": 72,
-                        "% Dissented": 28,
-                        "% Did Not Vote": 8},])
-    mep_df = pd.concat([mep_df, df2], ignore_index=True)
+    rows.append({
+        "mepID": mep["mepID"],
+        "name": mep["name"],
+        "party": party_name,
+        "country": mep["countryOfOrigin"],
+        "loyaltyScore": mep["loyaltyScore"],
+        "photoURL": mep.get("photoURL")
+    })
 
+df = pd.DataFrame(rows)
 
+# MEP Selection
+selected_name = st.selectbox("Select MEP", df["name"])
+selected = df[df["name"] == selected_name].iloc[0]
 
+# Display Headshot & Details
 
-photo_df = pd.read_csv("mep_photo.csv")  
-
-# Dropdown to select MEP
-selected_mep = st.selectbox("Select MEP", mep_df["name"])
-row = mep_df[mep_df["name"] == selected_mep].iloc[0]
-
-# Match photo by MEP ID
-# photo_url = photo_df.loc[photo_df["mepID"] == row["mepID"], "photo_url"].values[0]
-
-# Layout for photo + stats
 col1, col2 = st.columns([1, 3])
-
 with col1:
-    st.image(photo_url, caption=selected_mep, width=160)
+    if selected["photoURL"]:
+        st.image(selected["photoURL"], width=160, caption=selected_name)
+    else:
+        st.write("No photo available.")
 
 with col2:
-    st.subheader(selected_mep)
-    st.markdown(f"**Party**: {row['Party']}")
-    st.markdown(f"**Country**: {row['Country']}")
-    st.markdown(f"**Overall Loyalty Score**: {row['Overall Loyalty Score']}%")
+    st.subheader(selected_name)
+    st.markdown(f"**Party**: {selected['party']}")
+    st.markdown(f"**Country**: {selected['country']}")
+    st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
 
-# Voting Record Breakdown
+# Fetch Score Breakdown from API
+score_resp = requests.get(f"http://web-api:4000/m/mep/{selected['mepID']}/score")
+if score_resp.status_code == 200:
+    score_data = score_resp.json()
+    agreed = float(score_data.get("agreed", 0))
+    dissented = float(score_data.get("dissented", 0))
+    not_voted = float(score_data.get("notVoted", 0))
+else:
+    st.warning("Voting breakdown unavailable.")
+    agreed, dissented, not_voted = 0, 0, 0
+
+# Voting Breakdown Chart
 st.markdown("### Voting Record Breakdown")
-labels = ["Agreed", "Dissented", "Did Not Vote"]
-values = [row["% Agreed"], row["% Dissented"], row["% Did Not Vote"]]
 
-fig, ax = plt.subplots()
-ax.bar(labels, values, color=["#4CAF50", "#F44336", "#9E9E9E"])
-ax.set_ylabel("% of Votes")
-ax.set_ylim(0, 100)
-st.pyplot(fig)
+chart_df = pd.DataFrame({
+    "Category": ["Agreed", "Dissented", "Did Not Vote"],
+    "Percentage": [agreed, dissented, not_voted]
+})
+
+fig = px.bar(
+    chart_df,
+    x="Category",
+    y="Percentage",
+    color="Category",
+    color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
+    labels={"Percentage": "% of Votes"},
+)
+fig.update_layout(yaxis_range=[0, 100], showlegend=False)
+st.plotly_chart(fig)
 
 # Footer
 st.markdown("---")
-st.caption("Use this dashboard to explore individual MEP party loyalty patterns.")
+st.caption("Explore party loyalty and voting behavior of MEPs across the European Parliament.")

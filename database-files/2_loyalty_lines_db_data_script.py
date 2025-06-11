@@ -39,4 +39,3 @@ with open('output.txt', 'w', encoding='utf-8') as f:
             
 
         f.write(f"INSERT INTO mep(mepID, name, countryOfOrigin, loyaltyScore, partyID, photoURL) VALUES({row['id']}, \"{row['first_name']} {row['last_name']}\", \"{row['country']}\", {str(row['percent_agree_current'])[0:4]}, {party}, \"https://www.europarl.europa.eu/mepphoto/{row['id']}.jpg\");\n")
-        
