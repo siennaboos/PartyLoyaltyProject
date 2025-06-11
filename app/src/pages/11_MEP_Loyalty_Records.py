@@ -59,7 +59,7 @@ mep_df = pd.DataFrame()
 photo_url = "" 
 
 for mep in meps:
-    st.write(mep)
+    #st.write(mep)
     photo_url = mep["photoURL"]
     party = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party').json()["partyName"]
 
