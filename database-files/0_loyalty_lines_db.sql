@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS mep (
     loyaltyScore DECIMAL(3, 1),
     partyID INT,
     recommendedPartyID INT,
+    voteForPct DECIMAL(4, 2),
+    voteAgainstPct DECIMAL(4, 2),
+    voteAbstainPct DECIMAL(4, 2),
+    didNotVotePct DECIMAL(4, 2),
     photoURL VARCHAR(255),
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
     FOREIGN KEY (recommendedPartyID) REFERENCES political_party(partyID)
