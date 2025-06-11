@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:59f53959504517538f499288453d7d729a6758a249b5c7893beb09ecbba661e0
+size 186296
+=======
 vote_id,timestamp,display_title
 176731,2025-05-22,Deliberations of the Committee on Petitions in 2023
 176681,2025-05-22,Euratom research and training programme 2026-2027
@@ -1843,3 +1848,4 @@ vote_id,timestamp,display_title
 115404,2020-06-18,Competition policy - annual report 2019
 115399,2020-06-18,Recommendations on the negotiations for a new partnership with the United Kingdom of Great Britain and Northern Ireland
 115400,2020-06-18,The European Parliament’s position on the Conference on the Future of Europe
+>>>>>>> origin/main

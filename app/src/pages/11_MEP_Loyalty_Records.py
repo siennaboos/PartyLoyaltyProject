@@ -7,11 +7,10 @@ from modules.nav import SideBarLinks
 # Setup
 SideBarLinks()
 st.title("📄 MEP Party Loyalty Records")
+
 st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
 
-# ----------------------------
 # Load MEPs
-# ----------------------------
 response = requests.get("http://web-api:4000/m/meps")
 if response.status_code != 200:
     st.error("Failed to load MEPs.")
@@ -19,9 +18,7 @@ if response.status_code != 200:
 
 meps = response.json()
 
-# ----------------------------
 # Build DataFrame with party info
-# ----------------------------
 rows = []
 for mep in meps:
     party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
@@ -38,15 +35,12 @@ for mep in meps:
 
 df = pd.DataFrame(rows)
 
-# ----------------------------
 # MEP Selection
-# ----------------------------
 selected_name = st.selectbox("Select MEP", df["name"])
 selected = df[df["name"] == selected_name].iloc[0]
 
-# ----------------------------
 # Display Headshot & Details
-# ----------------------------
+
 col1, col2 = st.columns([1, 3])
 with col1:
     if selected["photoURL"]:
@@ -60,9 +54,7 @@ with col2:
     st.markdown(f"**Country**: {selected['country']}")
     st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
 
-# ----------------------------
 # Fetch Score Breakdown from API
-# ----------------------------
 score_resp = requests.get(f"http://web-api:4000/m/mep/{selected['mepID']}/score")
 if score_resp.status_code == 200:
     score_data = score_resp.json()
@@ -73,9 +65,7 @@ else:
     st.warning("Voting breakdown unavailable.")
     agreed, dissented, not_voted = 0, 0, 0
 
-# ----------------------------
 # Voting Breakdown Chart
-# ----------------------------
 st.markdown("### Voting Record Breakdown")
 
 chart_df = pd.DataFrame({
@@ -94,8 +84,6 @@ fig = px.bar(
 fig.update_layout(yaxis_range=[0, 100], showlegend=False)
 st.plotly_chart(fig)
 
-# ----------------------------
 # Footer
-# ----------------------------
 st.markdown("---")
 st.caption("Explore party loyalty and voting behavior of MEPs across the European Parliament.")

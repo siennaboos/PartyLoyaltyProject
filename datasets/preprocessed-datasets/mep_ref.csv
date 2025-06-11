@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:b80558c41d0c2e889771160e274b0e67f716a5e0587422327e4d7b7980791c2d
+size 126661
+=======
 mep_id,name,european_group
 96834,Iliana IVANOVA,
 573,Pierre BILLOTTE,
@@ -5253,3 +5258,4 @@ mep_id,name,european_group
 28416,Romano Maria LA RUSSA,
 96603,Nessa CHILDERS,
 39722,Sebastian Valentin BODU,
+>>>>>>> origin/main

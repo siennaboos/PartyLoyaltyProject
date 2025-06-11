@@ -7,18 +7,13 @@ import pydeck as pdk
 from urllib.error import URLError
 from modules.nav import SideBarLinks
 
+import plotly.graph_objects as go
 
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-
-from modules.nav import SideBarLinks
 SideBarLinks()
 
 

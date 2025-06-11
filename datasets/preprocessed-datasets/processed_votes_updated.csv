@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+version https://git-lfs.github.com/spec/v1
+oid sha256:6c3d3299ccb907d38681dc327ad31add47b1456bc3643da14689e06dbbac647b
+size 826530
+=======
 policy_id,date,party,votes_for,votes_against,abstentions,no_votes,majority_vote_count,majority_col,total_votes,percent_dissenters
 152666,2023-02-13 17:16:09,Progressive Alliance of Socialists and Democrats,88,0,0,56,88,votes_for,144,38.88888888888889
 152666,2023-02-13 17:16:09,European People’s Party,4,81,2,89,89,no_votes,176,49.43181818181818
@@ -8057,3 +8062,4 @@ policy_id,date,party,votes_for,votes_against,abstentions,no_votes,majority_vote_
 176681,2025-05-22 11:22:44,European People’s Party,150,0,3,35,150,votes_for,188,20.212765957446805
 176681,2025-05-22 11:22:44,Progressive Alliance of Socialists and Democrats,100,5,0,31,100,votes_for,136,26.47058823529412
 176731,2025-05-22 11:38:51,European Conservatives and Reformists,51,4,9,16,51,votes_for,80,36.25
+>>>>>>> origin/main
