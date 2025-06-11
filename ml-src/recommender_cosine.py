@@ -30,6 +30,7 @@ def get_metrics(df, party_name, **kwargs):
         df_metrics (DataFrame): DataFrame of standardized metrics for recommender
     """
     
+    # turning percent columns into decimals so all values are standardized - between 0 and 1
     columns_to_decimals = ['percent_agree_current', 'percent_show_up', 'European People’s Party percentage', 'Renew Europe percentage',
      'Progressive Alliance of Socialists and Democrats percentage',
      'European Conservatives and Reformists percentage',
@@ -41,6 +42,7 @@ def get_metrics(df, party_name, **kwargs):
     
     df[columns_to_decimals] = df[columns_to_decimals] / 100
 
+    # accounting for kwargs and creating DataFrame accordingly
     if 'party' in kwargs and 'country' in kwargs:
         df_metrics = df[['party', 'percent_agree_current', 'percent_show_up', 'country', f'{party_name} percentage']]
 
@@ -65,9 +67,10 @@ def get_encoded_df(df):
     Returns:
         df (DataFrame): DataFrame with one-hot encoded categorical metrics
     """
-    
+    # getting column names
     columns = df.columns
 
+    # accounting for optional party and/or country parameters and creating encoded df accordingly
     if 'party' in columns and 'country' in columns:
         party_dummies = pd.get_dummies(df, columns=['party'], dtype='int', drop_first = True)
         df_encoded = pd.get_dummies(party_dummies, columns=['country'], dtype='int', drop_first = True)
@@ -100,10 +103,12 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
         vector (np array): vector of inputted criteria
     """
     
+    # creating first dictionary of non-optional parameters
     nums = {'percent_agree_current': [percent_agree_current/100], 
            'percent_show_up': [percent_attendance/100], 
            f'{my_party} percentage': [my_party_percentage/100]}
 
+    # party information dictionary if party specified in kwargs
     if 'new_candidate_party' in kwargs:
         
         parties = {'party_European Conservatives and Reformists': [0], 
@@ -116,12 +121,14 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
                'party_Renew Europe': [0],
                'party_The Left in the European Parliament – GUE/NGL': [0]}
     
+        # specifying original candidate party in dct
         for key in parties:
             if key[key.index('_')+1:] == kwargs['new_candidate_party']:
                 parties[key] = [1]            
         
         nums |= parties
     
+    # country information dictionary if country specified in kwargs
     if 'new_candidate_country' in kwargs:
     
         countries = {'country_Belgium': [0], 
@@ -151,13 +158,18 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
                'country_Spain': [0],
                'country_Sweden': [0]}
     
+        # specifying candidate country in dict
         for key in countries:
             if key[key.index('_')+1:] == kwargs['new_candidate_country']:
                 countries[key] = [1]
 
+        # adding dictionary
         nums |= countries
     
-    return np.array(pd.DataFrame(nums)).flatten()
+    # turning nums into a 1D np array for comparison
+    vector = np.array(pd.DataFrame(nums)).flatten()
+    
+    return vector
 
 def get_weights_vector(percent_agree_current_weight, percent_attendance_weight, my_party, my_party_percentage_weight, **kwargs):
     """
@@ -173,13 +185,14 @@ def get_weights_vector(percent_agree_current_weight, percent_attendance_weight, 
             - new_candidate_country_weight (float): importance values for country that new candidate is from
     
     Returns:
-        vector (np array): vector of importance value weights
+        weights (np array): vector of importance value weights
     """
-    
+    # first dictionary of non-optional parameters
     nums = {'percent_agree_current_weight': [percent_agree_current_weight/100], 
            'percent_show_up_weight': [percent_attendance_weight/100], 
            f'{my_party} percentage_weight': [my_party_percentage_weight/100]}
 
+    # creating dictionary of party weights if party specified in kwargs
     if 'new_candidate_party_weight' in kwargs:
         
         parties = {'party_European Conservatives and Reformists': [0], 
@@ -192,12 +205,14 @@ def get_weights_vector(percent_agree_current_weight, percent_attendance_weight, 
                'party_Renew Europe': [0],
                'party_The Left in the European Parliament – GUE/NGL': [0]}
     
+        # specifying current candidate party
         for key in parties:
             if key[key.index('_')+1:] == kwargs['new_candidate_party_weight']:
                 parties[key] = [1*(kwargs['new_candidate_party_weight']/100)]            
         
         nums |= parties
     
+    # creating dictionary of country weights if country specified in kwargs 
     if 'new_candidate_country_weight' in kwargs:
     
         countries = {'country_Belgium': [0], 
@@ -227,13 +242,17 @@ def get_weights_vector(percent_agree_current_weight, percent_attendance_weight, 
                'country_Spain': [0],
                'country_Sweden': [0]}
     
+        # specifying candidate country
         for key in countries:
             if key[key.index('_')+1:] == kwargs['new_candidate_country_weight']:
                 countries[key] = [1*(kwargs['new_candidate_country_weight']/100)]
 
         nums |= countries
     
-    return np.array(pd.DataFrame(nums)).flatten()
+    # turning dictionary into 1D numpy array for multiplication
+    weights = np.array(pd.DataFrame(nums)).flatten()
+
+    return weights
 
 def get_recs_df(full_df, encoded_df, filters_vec, party_name, **kwargs):
     """
@@ -250,21 +269,18 @@ def get_recs_df(full_df, encoded_df, filters_vec, party_name, **kwargs):
     Returns:
         recruits (DataFrame): top 10 MEPs to join the inputter's party 
     """
-    
+    # initializing lists
     mep_dot_products = []
     mep_cosines = []
     
-    # filters_row = pd.DataFrame(filters)
-    
-    # temp_vec = np.array(encoded_df.iloc[0])
-    # temp_vec.shape
+    # checking for optional weight parameter
     if 'weights' in kwargs:
         weights = kwargs['weights']
         filters_vec *= weights
     
+    # comparing inputted filters vector to every other MEP, taking weights into account if specified
     for idx in range(len(encoded_df)):
         temp_vec = np.array(encoded_df.iloc[idx]).flatten()
-        # print(temp_vec.shape)
         if 'weights' in kwargs:
             temp_vec *= weights
         
@@ -274,9 +290,8 @@ def get_recs_df(full_df, encoded_df, filters_vec, party_name, **kwargs):
     
         mep_dot_products.append(temp_dot)
         mep_cosines.append(temp_cos)
-
-    # new_party_percentage = 
     
+    # dictionary of MEP info
     dict_mep = {'mep_id': full_df.id,
             'first_name': full_df.first_name,
             'last_name': full_df.last_name,
@@ -289,7 +304,7 @@ def get_recs_df(full_df, encoded_df, filters_vec, party_name, **kwargs):
             'mep_cosine': mep_cosines}
     df_mep = pd.DataFrame(dict_mep)
     
-    # this sorts the data by the cosine score
+    # sorts the data by the cosine score
     sorted_df_mep = df_mep.sort_values(by='mep_cosine', ascending=False)
     
     filtered_df = sorted_df_mep[sorted_df_mep['current_party'] != party_name]
@@ -299,6 +314,7 @@ def get_recs_df(full_df, encoded_df, filters_vec, party_name, **kwargs):
                             'current_party_alignment': 'Current Party Alignment Rate', 
                             'attendance_rate': 'Attendance Rate'})
 
+    # getting and returning top 10 MEPs matching inputter's criteria/weights
     recruits = filtered_df.head(10)
     
     return recruits
@@ -319,7 +335,7 @@ def get_recommendations(df, percent_agree_current, percent_attendance, my_party,
         recs (DataFrame): top 10 MEPs to join the inputter's party 
     
     """
-    
+    # creating metrics df based on optional parameters specified
     if 'new_candidate_party' in kwargs and 'new_candidate_country' in kwargs:
         df_metrics = get_metrics(df, my_party, party = True, country = True)
 
@@ -332,8 +348,10 @@ def get_recommendations(df, percent_agree_current, percent_attendance, my_party,
     else:
         df_metrics = get_metrics(df, my_party)
 
+    # creating df with one-hot encoded categorical variables
     df_encoded = get_encoded_df(df_metrics)
 
+    # creating filters vector based on optional parameters specified
     if 'new_candidate_party' in kwargs and 'new_candidate_country' in kwargs:
         filters_vec = get_filters(percent_agree_current, percent_attendance, my_party, my_party_percentage, new_candidate_party = kwargs['new_candidate_party'], new_candidate_country = kwargs['new_candidate_country'])
 
@@ -346,9 +364,11 @@ def get_recommendations(df, percent_agree_current, percent_attendance, my_party,
     else:
         filters_vec = get_filters(percent_agree_current, percent_attendance, my_party, my_party_percentage)
 
+    # getting weights vector if weights specified in kwargs
     if 'weights' in kwargs:
         return get_recs_df(df, df_encoded, filters_vec, my_party, weights = kwargs['weights'])
 
+    # getting df of recommended MEPs
     recs = get_recs_df(df, df_encoded, filters_vec, my_party)
     
     return recs
@@ -425,12 +445,14 @@ def main():
         None
     """
     
-    # NOTE: party_name for get_weights_vector and get_recommendations parameters
-    # should be the SAME!
+    # NOTE: my_party for get_weights_vector and get_recommendations 
+    # parameters should be the *SAME*!
 
     # active_members.csv is data in a SQL table
     df = make_full_df('active_members.csv')
-    # percent_agree_current, percent_attendance, my_party, my_party_percentage, **kwarg
+    # parameters: percent_agree_current, percent_attendance, my_party, my_party_percentage, **kwargs (party and/or country)
+    
+    # testing!
     weights = get_weights_vector(5, 90,'Patriots for Europe', 4, new_candidate_country_weight = 1)
     recs = get_recommendations(df, 70, 80, 'Patriots for Europe', 80, new_candidate_country = 'France', weights = weights)
 
