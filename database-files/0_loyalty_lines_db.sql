@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS mep (
     name VARCHAR(255),
     contactInformation VARCHAR(255),
     countryOfOrigin VARCHAR(255),
-    loyaltyScore INT,
+    loyaltyScore DECIMAL(3, 1),
     partyID INT,
     recommendedPartyID INT,
     photoURL VARCHAR(255),
@@ -68,16 +68,3 @@ CREATE TABLE IF NOT EXISTS referenceDocument (
     PRIMARY KEY (legislationID, referenceID),
     FOREIGN KEY (legislationID) REFERENCES legislation(legislationID)
 );
-
-CREATE TABLE IF NOT EXISTS vote (
-    mepID INT,
-    legislationID INT,
-    description VARCHAR(255),
-    PRIMARY KEY (mepID, legislationID),
-    FOREIGN KEY (mepID) REFERENCES mep(mepID),
-    FOREIGN KEY (legislationID) REFERENCES legislation(legislationID)
-);
-
-
-
-
