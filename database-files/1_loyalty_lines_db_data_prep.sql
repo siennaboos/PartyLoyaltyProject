@@ -2,7 +2,7 @@ USE loyalty_lines;
 
 -- PREPARE POLIICAL PARTIES
 INSERT INTO political_party (partyName)
-VALUES ("European People’s Party");
+VALUES ("European People's Party");
 
 INSERT INTO political_party (partyName)
 VALUES ("Progressive Alliance of Socialists and Democrats");
