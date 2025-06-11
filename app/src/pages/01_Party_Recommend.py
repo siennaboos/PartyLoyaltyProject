@@ -3,6 +3,9 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from modules.nav import SideBarLinks
+SideBarLinks()
+
 st.title("Party Loyalty Recommender")
 
 # Input fields

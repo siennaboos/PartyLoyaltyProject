@@ -1,5 +1,8 @@
 import plotly.graph_objects as go
 
+from modules.nav import SideBarLinks
+SideBarLinks()
+
 # Example values
 labels = ['ESN', 'The Left', 'Renew Europe', 'Remaining']
 values = [25, 46, 77, 572]
