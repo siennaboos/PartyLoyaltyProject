@@ -12,10 +12,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-from modules.nav import SideBarLinks
-SideBarLinks()
 
 SideBarLinks()
+
 
 # Input fields
 agree_current = st.slider("Current Party Agreement (%)", 0, 100, 79, 1)
