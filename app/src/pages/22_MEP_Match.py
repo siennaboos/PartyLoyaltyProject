@@ -1,8 +1,17 @@
 
+import logging
+logger = logging.getLogger(__name__)
+
+import streamlit as st
+from modules.nav import SideBarLinks
+import plotly.express as px
+import pandas as pd
+import numpy as np
+SideBarLinks()
+
 import streamlit as st
 import requests
 
-st.set_page_config(layout="wide")
 st.title("📬 Find Your MEP Match")
 st.markdown("Answer a few questions to get MEP recommendations aligned with your values.")
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import logging
 logger = logging.getLogger(__name__)
 import streamlit as st
@@ -91,3 +92,5 @@ with chart_col2:
 # --- Footer ---
 st.markdown("---")
 st.caption("Explore party cohesion trends across the EU Parliament — built with 💡 by your data team.")
+=======
+>>>>>>> 8ffc12fc0012fc07dc2a39584a6cf5ac778f7199
