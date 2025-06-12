@@ -10,9 +10,6 @@ from modules.nav import SideBarLinks
 # Set layout to wide
 st.set_page_config(layout="wide")
 
-# Show appropriate sidebar links for the current user
-SideBarLinks()
-
 # --- Add CSS for blue buttons ---
 st.markdown("""
     <style>
@@ -24,7 +21,7 @@ st.markdown("""
         padding: 3rem 5rem;
     }
     .stButton {
-        padding-top: 19px;  /* Adjust as needed */
+        padding-top: 28px;  /* Adjust as needed */
     }
     .stButton>button {
         background-color: #365fc7;

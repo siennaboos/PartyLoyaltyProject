@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.express as px
 from modules.nav import SideBarLinks
 
 
@@ -38,14 +38,9 @@ def get_mep_data():
 
 # Setup
 SideBarLinks()
-
-# Title
 st.title("📄 MEP Party Loyalty Records")
-st.markdown("Select an MEP to see their loyalty breakdown and photo.")
 
-# Load MEPs from API
-resp = requests.get("http://web-api:4000/m/meps")
-meps = resp.json() if resp.status_code == 200 else []
+st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
 
 with st.spinner("Retrieving MEP information..."):
     mep_data = get_mep_data()
@@ -54,18 +49,20 @@ with st.spinner("Retrieving MEP information..."):
 selected_name = st.selectbox("Select MEP", mep_data["name"])
 selected = mep_data[mep_data["name"] == selected_name].iloc[0]
 
-# Two-column layout (photo/info left, chart right)
-col1, col2 = st.columns([1, 2])
+# Display Headshot & Details
 
+col1, col2 = st.columns([1, 3])
 with col1:
-    st.image(selected['photoURL'], caption=selected, width=160)
-    st.subheader(selected)
-    st.markdown(f"**Party**: {selected['Party']}")
-    st.markdown(f"**Country**: {selected['Country']}")
-    st.markdown(f"**Overall Loyalty Score**: {selected['Overall Loyalty Score']}%")
+    if selected["photoURL"]:
+        st.image(selected["photoURL"], width=160, caption=selected_name)
+    else:
+        st.write("No photo available.")
 
 with col2:
-    st.markdown("### Voting Record Breakdown")
+    st.subheader(selected_name)
+    st.markdown(f"**Party**: {selected['party']}")
+    st.markdown(f"**Country**: {selected['country']}")
+    st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
 
 # Fetch Score Breakdown from API
 score_resp = requests.get(f"http://web-api:4000/m/mep/{selected['mepID']}/score")
@@ -75,28 +72,35 @@ if score_resp.status_code == 200:
     dissented = float(score_data.get("dissented", 0))
     not_voted = float(score_data.get("notVoted", 0))
 
+
+
+
+
+
     
 else:
     st.warning("Voting breakdown unavailable.")
     agreed, dissented, not_voted = 0, 0, 0
-    dissent_data = None
-    if dissent_data:
-        dissent_rate = round(dissent_data['dissent_rate'], 2)
-        alignment_rate = round(100 - dissent_rate, 2)
 
-        # Improved dual bar chart with Plotly
-        fig = go.Figure(data=[
-            go.Bar(name='Alignment', x=['Voting Behavior'], y=[alignment_rate], marker_color='green', width=0.4),
-            go.Bar(name='Dissent', x=['Voting Behavior'], y=[dissent_rate], marker_color='crimson', width=0.4)
-        ])
-        fig.update_layout(
-            barmode='stack',
-            yaxis=dict(title="Percentage (%)", range=[0, 100]),
-            title=dict(text="Alignment vs. Dissent Rate", font=dict(size=20)),
-            legend=dict(orientation="h", y=-0.2),
-            margin=dict(t=50, b=50),
-            height=400
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.error("Could not retrieve dissent rate.")
+# Voting Breakdown Chart
+st.markdown("### Voting Record Breakdown")
+
+chart_df = pd.DataFrame({
+    "Category": ["Agreed", "Dissented", "Did Not Vote"],
+    "Percentage": [agreed, dissented, not_voted]
+})
+
+fig = px.bar(
+    chart_df,
+    x="Category",
+    y="Percentage",
+    color="Category",
+    color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
+    labels={"Percentage": "% of Votes"},
+)
+fig.update_layout(yaxis_range=[0, 100], showlegend=False)
+st.plotly_chart(fig)
+
+# Footer
+st.markdown("---")
+st.caption("Explore party loyalty and voting behavior of MEPs across the European Parliament.")
