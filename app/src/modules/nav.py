@@ -61,10 +61,10 @@ def MEPInfoNav():
     st.sidebar.page_link("pages/21_MEP_Party_Info.py", label="MEP & Party Info", icon="🏢")
 
 def MEPComparisonNav():
-    st.sidebar.page_link("pages/22_MEP_Comparison.py", label="Country Explorer", icon="🆚")
+    st.sidebar.page_link("pages/22_MEP_Comparison.py", label="MEP Comparison", icon="🆚")
 
 def MEPMatchNav():
-    st.sidebar.page_link("pages/23_MEP_Match.py", label="Country Explorer", icon="🌍")
+    st.sidebar.page_link("pages/23_MEP_Match.py", label="MEP Matcher", icon="👥")
 
 
 
