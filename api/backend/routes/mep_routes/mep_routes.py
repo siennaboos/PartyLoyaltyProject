@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, make_response
 from mysql.connector import Error
 
+
 from backend.db_connection import db
 
 meps = Blueprint("meps", __name__)
@@ -9,7 +10,7 @@ meps = Blueprint("meps", __name__)
 def get_all_meps():
     current_app.logger.info('GET /meps route entered')
     query = '''
-        SELECT mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID, photoURL
+        SELECT mepID, name, countryOfOrigin, loyaltyScore, percentDisagree, percentTurnout, partyID, recommendedPartyID, photoURL
         FROM mep;
     '''
     cursor = db.get_db().cursor()
@@ -107,6 +108,7 @@ def get_mep_loyalty_score(mepID):
     except Error as e:
         current_app.logger.error(f"Database error: {e}")
         return jsonify({"error": str(e)}), 500
+        
 
 @meps.route("/mep/<int:mepID>/score", methods=['PUT'])
 def update_mep_loyalty_score(mepID):

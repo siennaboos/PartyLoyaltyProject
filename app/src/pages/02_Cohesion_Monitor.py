@@ -1,93 +1,101 @@
-import logging
-logger = logging.getLogger(__name__)
 import streamlit as st
-from streamlit_extras.app_logo import add_logo
-import pandas as pd
-import pydeck as pdk
-from urllib.error import URLError
+import requests
 from modules.nav import SideBarLinks
 
-import plotly.graph_objects as go
-
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-
+# Sidebar nav
 SideBarLinks()
 
+# Constants
+USER_ID = 1
+WATCHLIST_URL = f"http://web-api:4000/w/user/{USER_ID}/watchlists"
+ALL_MEPS_URL = "http://web-api:4000/w/all_meps"
 
-# --- Sidebar Navigation ---
+# Fetch watchlist
+def get_watchlist():
+    try:
+        res = requests.get(WATCHLIST_URL)
+        if res.status_code == 200:
+            return res.json()
+        st.error(f"Watchlist error {res.status_code}: {res.text}")
+    except Exception as e:
+        st.error(f"Watchlist fetch failed: {e}")
+    return []
 
-# --- Page Setup ---
-st.title("📊 Party Cohesion Dashboard")
-st.markdown("Track dissent and alignment across EU parties with visual insights.")
+# Fetch MEPs for dropdown
+def get_all_meps():
+    try:
+        res = requests.get(ALL_MEPS_URL)
+        if res.status_code == 200:
+            return res.json()
+        st.error(f"MEP list error {res.status_code}: {res.text}")
+    except Exception as e:
+        st.error(f"MEP list fetch failed: {e}")
+    return []
 
-# --- Date Range and Party Selection ---
-col1, col2 = st.columns([1, 2])
+# Add MEP
+def add_to_watchlist(mep_id):
+    try:
+        res = requests.post(WATCHLIST_URL, json={"mepID": mep_id})
+        if res.status_code == 201:
+            st.success("✅ MEP added.")
+            st.rerun()
+        elif res.status_code == 409:
+            st.warning("⚠️ MEP already in watchlist.")
+        else:
+            msg = res.json().get("error", "Something went wrong.")
+            st.error(f"❌ Failed to add: {msg}")
+    except Exception as e:
+        st.error(f"Add failed: {e}")
 
-with col1:
-    st.markdown("#### 📅 Date Range")
-    st.date_input("Choose a time window:", [], key="date_range")
+# Remove MEP
+def remove_from_watchlist(mep_id):
+    try:
+        res = requests.delete(WATCHLIST_URL, json={"mepID": mep_id})
+        if res.status_code == 200:
+            st.success("🗑️ MEP removed.")
+            st.rerun()
+        else:
+            st.error(f"Remove failed: {res.text}")
+    except Exception as e:
+        st.error(f"Remove error: {e}")
 
-with col2:
-    st.markdown("#### 🏛️ Select Parties")
-    parties = ["My Party", "X Party", "Y Party"]
-    selected_parties = st.multiselect("Included Parties", parties, default=parties)
+# ---------- UI ----------
 
-# --- Mock Data ---
-dates = pd.date_range(start="2023-01-01", periods=12, freq="M")
-data = {
-    "My Party": np.random.uniform(80, 95, size=12),
-    "X Party": np.random.uniform(65, 85, size=12),
-    "Y Party": np.random.uniform(70, 90, size=12)
-}
+st.title("👀 Current Watchlist")
+watchlist = get_watchlist()
 
-# --- Dashboard Charts ---
-chart_col1, chart_col2 = st.columns(2)
+if not watchlist:
+    st.info("No MEPs in your watchlist yet.")
+else:
+    for mep in watchlist:
+        with st.container():
+            st.markdown("---")
+            cols = st.columns([1, 3])
+            with cols[0]:
+                mep_id = mep.get("mepID")
+                photo_url = f"https://www.europarl.europa.eu/mepphoto/{mep_id}.jpg" if mep_id else ""
+                st.image(photo_url, width=100)
+            with cols[1]:
+                st.markdown(f"### {mep.get('name', 'Unnamed MEP')}")
+                st.markdown(f"**🌍 Country**: {mep.get('countryOfOrigin', 'Unknown')}")
+                st.markdown(f"**📊 Loyalty Score**: {mep.get('loyaltyScore', '?')}")
+                st.markdown(f"**🏛️ Party ID**: {mep.get('partyID')} → Recommended: {mep.get('recommendedPartyID')}")
+                if mep_id:
+                    st.button(
+                        "❌ Remove",
+                        key=f"remove_{mep_id}_{mep['name']}",
+                        on_click=remove_from_watchlist,
+                        args=(mep_id,)
+                    )
 
-# --- Line Chart: Cohesion Over Time ---
-with chart_col1:
-    st.markdown("#### 📈 Alignment Over Time")
-    fig_line = go.Figure()
-    for party in selected_parties:
-        fig_line.add_trace(go.Scatter(
-            x=dates,
-            y=data[party],
-            mode='lines+markers',
-            name=party,
-            hovertemplate='%{y:.1f}% alignment<br>%{x|%b %Y}'
-        ))
-    fig_line.update_layout(
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% Votes Aligned",
-        xaxis_title="Date",
-        legend_title="Party",
-        template="plotly_white"
-    )
-    st.plotly_chart(fig_line, use_container_width=True)
+# Divider
+st.markdown("## ➕ Add MEP to Watchlist")
 
-# --- Bar Chart: Alignment vs. Dissent ---
-with chart_col2:
-    st.markdown("#### 📊 Alignment vs Dissent")
-    alignment = [round(data[p].mean(), 1) for p in selected_parties]
-    dissent = [round(100 - val, 1) for val in alignment]
-
-    fig_bar = go.Figure(data=[
-        go.Bar(name='Alignment', x=selected_parties, y=alignment, marker_color='green'),
-        go.Bar(name='Dissent', x=selected_parties, y=dissent, marker_color='crimson')
-    ])
-    fig_bar.update_layout(
-        barmode='group',
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% of Votes",
-        template="plotly_white",
-        legend_title="Vote Type"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-# --- Footer ---
-st.markdown("---")
-st.caption("Explore party cohesion trends across the EU Parliament — built with 💡 by your data team.")
+all_meps = get_all_meps()
+if all_meps:
+    mep_options = {f"{mep['name']} ({mep['mepID']})": mep["mepID"] for mep in all_meps}
+    selection = st.selectbox("Select MEP by name", list(mep_options.keys()))
+    if st.button("Add Selected MEP"):
+        add_to_watchlist(mep_options[selection])
+else:
+    st.warning("⚠️ No MEPs available.")

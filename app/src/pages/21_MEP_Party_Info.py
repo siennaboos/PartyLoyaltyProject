@@ -1,116 +1,91 @@
-import logging
-logger = logging.getLogger(__name__)
 import streamlit as st
-from modules.nav import SideBarLinks
 import requests
-
-st.set_page_config(layout = 'wide')
-
-SideBarLinks()
-
-import streamlit as st
-import pandas as pd
-
-import streamlit as st
 import pandas as pd
 import plotly.express as px
-import requests
+from modules.nav import SideBarLinks
 
-st.title("🤝 Compare Two MEPs")
 
-# ----------------------------
-# Load MEP data from API
-# ----------------------------
-resp = requests.get("http://web-api:4000/m/meps")
-meps = resp.json() if resp.status_code == 200 else []
+@st.cache_data
+def get_mep_data():
+    # Load MEPs
+    response = requests.get("http://web-api:4000/m/meps")
+    if response.status_code != 200:
+        st.error("Failed to load MEPs.")
+        st.stop()
 
-# ----------------------------
-# Build DataFrame with party info
-# ----------------------------
-mep_df = pd.DataFrame()
-for mep in meps:
-    try:
-        party_resp = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party')
-        party = party_resp.json().get("partyName", "Unknown")
-    except:
-        party = "Unknown"
+    meps = response.json()
 
-    row = pd.DataFrame([{
-        "mepID": mep["mepID"],
-        "name": mep["name"],
-        "party": party,
-        "country": mep["countryOfOrigin"],
-        "loyalty": mep["loyaltyScore"],
-        "photoURL": mep.get("photoURL"),
-        "% Agreed": 72,
-        "% Dissented": 20,
-        "% Did Not Vote": 8
-    }])
-    mep_df = pd.concat([mep_df, row], ignore_index=True)
+    # Build DataFrame with party info
+    rows = []
+    for mep in meps:
+        party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
+        party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
 
-# ----------------------------
-# MEP A & B Selectors
-# ----------------------------
-colA, colB = st.columns(2)
+        rows.append({
+            "mepID": mep["mepID"],
+            "name": mep["name"],
+            "party": party_name,
+            "country": mep["countryOfOrigin"],
+            "loyaltyScore": mep["loyaltyScore"],
+            "percentDisagree": mep["percentDisagree"],
+            "percentTurnout": mep["percentTurnout"],
+            "photoURL": mep.get("photoURL")
+        })
 
-mep_names = mep_df["name"].tolist()
+    return pd.DataFrame(rows)
 
-with colA:
-    mepA_name = st.selectbox("Select MEP A", mep_names, key="mepA")
 
-with colB:
-    mepB_name = st.selectbox("Select MEP B", mep_names, key="mepB")
 
-if mepA_name == mepB_name:
-    st.warning("Please select two different MEPs for comparison.")
-    st.stop()
 
-mepA = mep_df[mep_df["name"] == mepA_name].iloc[0]
-mepB = mep_df[mep_df["name"] == mepB_name].iloc[0]
 
-# ----------------------------
-# Side-by-Side Profile Display
-# ----------------------------
-col1, col2 = st.columns(2)
+# Setup
+SideBarLinks()
+st.title("📄 MEP Party Loyalty Records")
 
+st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
+
+with st.spinner("Retrieving MEP information..."):
+    mep_data = get_mep_data()
+
+# MEP Selection
+selected_name = st.selectbox("Select MEP", mep_data["name"])
+selected = mep_data[mep_data["name"] == selected_name].iloc[0]
+
+# Display Headshot & Details
+
+col1, col2 = st.columns([1, 3])
 with col1:
-    st.subheader(f"👤 {mepA['name']}")
-    if mepA["photoURL"]:
-        st.image(mepA["photoURL"], width=160)
-    st.markdown(f"**Country**: {mepA['country']}")
-    st.markdown(f"**Party**: {mepA['party']}")
-    st.markdown(f"**Loyalty Score**: {mepA['loyalty']}%")
+    if selected["photoURL"]:
+        st.image(selected["photoURL"], width=160, caption=selected_name)
+    else:
+        st.write("No photo available.")
 
 with col2:
-    st.subheader(f"👤 {mepB['name']}")
-    if mepB["photoURL"]:
-        st.image(mepB["photoURL"], width=160)
-    st.markdown(f"**Country**: {mepB['country']}")
-    st.markdown(f"**Party**: {mepB['party']}")
-    st.markdown(f"**Loyalty Score**: {mepB['loyalty']}%")
+    st.subheader(selected_name)
+    st.markdown(f"**Party**: {selected['party']}")
+    st.markdown(f"**Country**: {selected['country']}")
+    st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
 
-# ----------------------------
+
 # Voting Breakdown Chart
-# ----------------------------
-st.markdown("### 📊 Voting Breakdown Comparison")
+st.markdown("### Voting Record Breakdown")
 
-compare_df = pd.DataFrame({
-    "Category": ["Agreed", "Dissented", "Did Not Vote"] * 2,
-    "Percentage": [
-        mepA["% Agreed"], mepA["% Dissented"], mepA["% Did Not Vote"],
-        mepB["% Agreed"], mepB["% Dissented"], mepB["% Did Not Vote"]
-    ],
-    "MEP": [mepA["name"]] * 3 + [mepB["name"]] * 3
+chart_df = pd.DataFrame({
+    "Category": ["Agreed", "Dissented", "Turnout"],
+    "Percentage": [selected["loyaltyScore"], selected["percentDisagree"], selected["percentTurnout"]]
 })
 
 fig = px.bar(
-    compare_df,
+    chart_df,
     x="Category",
     y="Percentage",
-    color="MEP",
-    barmode="group",
-    title="Voting Record Comparison",
-    labels={"Percentage": "% of Votes"}
+    color="Category",
+    color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
+    labels={"Percentage": "% of Votes"},
 )
-fig.update_layout(yaxis_range=[0, 100])
-st.plotly_chart(fig, use_container_width=True)
+fig.update_layout(yaxis_range=[0, 100], showlegend=False)
+st.plotly_chart(fig)
+
+# Footer
+st.markdown("---")
+st.caption("Explore party loyalty and voting behavior of MEPs across the European Parliament.")

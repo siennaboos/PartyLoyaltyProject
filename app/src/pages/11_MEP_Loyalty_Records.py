@@ -4,40 +4,50 @@ import pandas as pd
 import plotly.express as px
 from modules.nav import SideBarLinks
 
+
+@st.cache_data
+def get_mep_data():
+    # Load MEPs
+    response = requests.get("http://web-api:4000/m/meps")
+    if response.status_code != 200:
+        st.error("Failed to load MEPs.")
+        st.stop()
+
+    meps = response.json()
+
+    # Build DataFrame with party info
+    rows = []
+    for mep in meps:
+        party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
+        party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
+
+        rows.append({
+            "mepID": mep["mepID"],
+            "name": mep["name"],
+            "party": party_name,
+            "country": mep["countryOfOrigin"],
+            "loyaltyScore": mep["loyaltyScore"],
+            "photoURL": mep.get("photoURL")
+        })
+
+    return pd.DataFrame(rows)
+
+
+
+
+
 # Setup
 SideBarLinks()
 st.title("📄 MEP Party Loyalty Records")
 
 st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
 
-# Load MEPs
-response = requests.get("http://web-api:4000/m/meps")
-if response.status_code != 200:
-    st.error("Failed to load MEPs.")
-    st.stop()
-
-meps = response.json()
-
-# Build DataFrame with party info
-rows = []
-for mep in meps:
-    party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
-    party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
-
-    rows.append({
-        "mepID": mep["mepID"],
-        "name": mep["name"],
-        "party": party_name,
-        "country": mep["countryOfOrigin"],
-        "loyaltyScore": mep["loyaltyScore"],
-        "photoURL": mep.get("photoURL")
-    })
-
-df = pd.DataFrame(rows)
+with st.spinner("Retrieving MEP information..."):
+    mep_data = get_mep_data()
 
 # MEP Selection
-selected_name = st.selectbox("Select MEP", df["name"])
-selected = df[df["name"] == selected_name].iloc[0]
+selected_name = st.selectbox("Select MEP", mep_data["name"])
+selected = mep_data[mep_data["name"] == selected_name].iloc[0]
 
 # Display Headshot & Details
 
@@ -61,6 +71,13 @@ if score_resp.status_code == 200:
     agreed = float(score_data.get("agreed", 0))
     dissented = float(score_data.get("dissented", 0))
     not_voted = float(score_data.get("notVoted", 0))
+
+
+
+
+
+
+    
 else:
     st.warning("Voting breakdown unavailable.")
     agreed, dissented, not_voted = 0, 0, 0
