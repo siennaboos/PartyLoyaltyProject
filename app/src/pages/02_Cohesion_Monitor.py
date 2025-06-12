@@ -3,89 +3,114 @@ logger = logging.getLogger(__name__)
 import streamlit as st
 from streamlit_extras.app_logo import add_logo
 import pandas as pd
-import pydeck as pdk
-from urllib.error import URLError
 from modules.nav import SideBarLinks
-
 import plotly.graph_objects as go
-
-import matplotlib.pyplot as plt
-import numpy as np
+import requests
+import plotly.express as px
 
 SideBarLinks()
 
-
-# --- Sidebar Navigation ---
-
 # --- Page Setup ---
-st.title("📊 Party Cohesion Dashboard")
-st.markdown("Track dissent and alignment across EU parties with visual insights.")
+st.title("📊 Percent Dissent Predictor")
+st.markdown("Want to see how unified a party will be on a certain type of vote? Choose a party and procedure type"
+" to predict percent dissent.")
 
-# --- Date Range and Party Selection ---
-col1, col2 = st.columns([1, 2])
-
-with col1:
-    st.markdown("#### 📅 Date Range")
-    st.date_input("Choose a time window:", [], key="date_range")
-
-with col2:
-    st.markdown("#### 🏛️ Select Parties")
-    parties = ["My Party", "X Party", "Y Party"]
-    selected_parties = st.multiselect("Included Parties", parties, default=parties)
-
-# --- Mock Data ---
-dates = pd.date_range(start="2023-01-01", periods=12, freq="M")
-data = {
-    "My Party": np.random.uniform(80, 95, size=12),
-    "X Party": np.random.uniform(65, 85, size=12),
-    "Y Party": np.random.uniform(70, 90, size=12)
+# --- Party and Procedure Type Selection ---
+st.markdown("#### 🏛️ Select Parties and Procedure Types")
+party_dict = {
+    "European Conservatives and Reformists": "ECR",
+    "European People's Party": "EPP",
+    "Europe of Sovereign Nations": "ESN",
+    "The Left in the European Parliament – Nordic Green Left": "GUE/NGL",
+    "The Greens/European Free Alliance": "Greens/EFA",
+    "Identity and Democracy": "ID",
+    "Patriots for Europe": "Patriots for Europe",
+    "Renew Europe": "Renew",
+    "Progressive Alliance of Socialists and Democrats": "S&D"
 }
 
-# --- Dashboard Charts ---
-chart_col1, chart_col2 = st.columns(2)
+procedure_dict = {
+    'Act for Codification Initiative': 'ACI',
+    'Approval procedure': 'APP',
+    'Budget procedure': 'BUD',
+    'Budgetary Control procedure': 'BUI',
+    'Consultation procedure': 'CNS',
+    'Ordinary legislative procedure (formerly co-decision)': 'COD',
+    'Delegated act': 'DEA',
+    'Discharge procedure': 'DEC',
+    'Own-initiative procedure': 'INI',
+    'Legislative initiative procedure': 'INL',
+    'Consent procedure (formerly assent)': 'NLE',
+    'Rule change or internal regulation': 'REG',
+    'Resolution procedure (Special)': 'RPS',
+    'Rule of Procedure (Organisational)': 'RSO',
+    'Non-legislative resolution': 'RSP'
+}
 
-# --- Line Chart: Cohesion Over Time ---
-with chart_col1:
-    st.markdown("#### 📈 Alignment Over Time")
-    fig_line = go.Figure()
-    for party in selected_parties:
-        fig_line.add_trace(go.Scatter(
-            x=dates,
-            y=data[party],
-            mode='lines+markers',
-            name=party,
-            hovertemplate='%{y:.1f}% alignment<br>%{x|%b %Y}'
-        ))
-    fig_line.update_layout(
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% Votes Aligned",
-        xaxis_title="Date",
-        legend_title="Party",
-        template="plotly_white"
-    )
-    st.plotly_chart(fig_line, use_container_width=True)
+selected_parties = st.multiselect("Included Parties", party_dict.keys(), default=None)
+selected_procedures = st.multiselect("Included Procedure Types", procedure_dict.keys(), default=None)
+
+input = {
+    'parties' : [party_dict[party] for party in selected_parties],
+    'procedures' : [procedure_dict[procedure] for procedure in selected_procedures]
+}
+
+logger.info(selected_procedures)
+
+response = requests.post(f"http://web-api:4000/l/prediction", json=input)
+
+if response.status_code != 200:
+    st.write("Could not make a prediction :(")
+    st.stop()
+
+predicted_dissent = response.json()
+
+# Displaying dissent prediction
+st.markdown("#### 📈 Predicted Dissent From Party Majority")
+if st.button('Predict Dissent', use_container_width=False):
+    st.metric('Percent Dissent', predicted_dissent['prediction'], border=True)
 
 # --- Bar Chart: Alignment vs. Dissent ---
-with chart_col2:
-    st.markdown("#### 📊 Alignment vs Dissent")
-    alignment = [round(data[p].mean(), 1) for p in selected_parties]
-    dissent = [round(100 - val, 1) for val in alignment]
+st.markdown("#### 📊 Average Loyalty Score for Each Party")
+st.write('This visualization shows the average loyalty score for MEPs in every party in the EU. Loyalty scores are calculated based on dissent and alignment rates.')
+st.write('\'Dissent\' refers to the action of an MEP voting differently than the majority of MEPs in their formally affiliated party.')
 
-    fig_bar = go.Figure(data=[
-        go.Bar(name='Alignment', x=selected_parties, y=alignment, marker_color='green'),
-        go.Bar(name='Dissent', x=selected_parties, y=dissent, marker_color='crimson')
-    ])
-    fig_bar.update_layout(
-        barmode='group',
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% of Votes",
-        template="plotly_white",
-        legend_title="Vote Type"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
+# ----------------------------
+# Load MEP data from API
+# ----------------------------
+resp = requests.get("http://web-api:4000/m/meps")
+meps = resp.json() if resp.status_code == 200 else []
+
+# ----------------------------
+# Build DataFrame with party info
+# ----------------------------
+mep_df = pd.DataFrame()
+for mep in meps:
+    try:
+        party_resp = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party')
+        party = party_resp.json().get("partyName", "Unknown")
+    except:
+        party = "Unknown"
+
+    row = pd.DataFrame([{
+        "mepID": mep["mepID"],
+        "party": party,
+        "loyalty": float(mep["loyaltyScore"]),
+    }])
+    mep_df = pd.concat([mep_df, row], ignore_index=True)
+
+mep_df.replace('European Peopleâ€™s Party', 'European Peoples\' Party', inplace=True)
+party_df = mep_df.groupby("party", as_index=False)["loyalty"].mean()
+
+
+fig = px.bar(party_df, x='party', y='loyalty', labels={'party': 'Party', 'loyalty': 'Average Loyalty Score'},
+    width=600, height=800)
+
+# Angle the x-axis labels
+fig.update_layout(xaxis_tickangle=-45)
+
+st.plotly_chart(fig, use_container_width=False)
 
 # --- Footer ---
 st.markdown("---")
-st.caption("Explore party cohesion trends across the EU Parliament — built with 💡 by your data team.")
+st.caption("Explore party cohesion trends across the EU Parliament — built by the Loyalty Lines data team 💡")
