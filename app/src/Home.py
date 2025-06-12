@@ -1,10 +1,19 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import streamlit as st
 from PIL import Image
 import requests
 
+from modules.nav import SideBarLinks
+
+# Set layout to wide
 st.set_page_config(layout="wide")
 
-# CSS Styling
+# Show appropriate sidebar links for the current user
+SideBarLinks()
+
+# --- Add CSS for blue buttons ---
 st.markdown("""
     <style>
     html, body, [class*="css"] {
@@ -22,11 +31,12 @@ st.markdown("""
         color: white;
         padding: 0.3em 1.5em;
         border-radius: 8px;
-        font-size: 1rem;
-        margin-bottom: 1rem;
+        font-size: 16px;
+        width: 100%;
     }
-    .stButton>button:hover {
-        background-color: #2e4da5;
+    div.stButton > button:hover {
+        background-color: #264d99;
+        color: white;
     }
     </style>
 """, unsafe_allow_html=True)

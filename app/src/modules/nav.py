@@ -28,7 +28,7 @@ def PartyRecommenderNav():
 
 
 def PartyCohesionNav():
-    st.sidebar.page_link("pages/02_Cohesion_Monitor.py", label="Party Cohesion Monitor", icon="📈")
+    st.sidebar.page_link("pages/02_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="📈")
 
 def MEPWatchlistNav():
     st.sidebar.page_link("pages/03_MEP_Watchlist.py", label="MEP Watchlist", icon="🔍")
@@ -44,7 +44,7 @@ def LoyaltyRecordsNav():
 
 def CohesionMonitorNav():
     st.sidebar.page_link(
-        "pages/12_Party_Cohesion_Monitor.py", label="Party Cohesion Monitor", icon="🖥️"
+        "pages/12_Party_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="🖥️"
 )
 
 def RecommenderNav():
@@ -75,7 +75,7 @@ def SideBarLinks(show_home=False):
     """
 
     # add a logo to the sidebar always
-    st.sidebar.image("assets/our_logo.png", width=150)
+    st.sidebar.image("assets/our_logo.png", width=280)
 
     # If there is no logged in user, redirect to the Home (Landing) page
     if "authenticated" not in st.session_state:
