@@ -14,6 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import requests
+import json
 
 SideBarLinks()
 
@@ -64,23 +65,29 @@ selected_procedures = st.multiselect("Included Procedure Types", procedure_dict.
 chart_col1, chart_col2 = st.columns(2)
 
 # Make Prediction
+st.write(selected_parties)
+st.write(selected_procedures)
+
 input = {
-    'Parties' : selected_parties,
-    'Procedures' : selected_procedures
-}
-headers = {
-    "Content Type": "application/json"
+    'parties' : selected_parties,
+    'procedures' : selected_procedures
 }
 
-response = requests.get(f"http://web-api:4000/l/prediction", headers=headers, params=input)
-st.write(response.status_code)
-st.write(response.json)
+
+logger.info("bruh")
+logger.info(selected_procedures)
+
+response = requests.post(f"http://web-api:4000/l/prediction", json=input)
+
+if response.status_code != 200:
+    st.write("Could not make a prediction :(")
+    st.stop()
 
 predicted_dissent = response.json()
 
 # Displaying dissent prediction (mock rn)
 st.markdown("#### 📈 Predicted Dissent From Party Majority")
-st.metric('Percent Dissent', predicted_dissent, border=True)
+st.metric('Percent Dissent', predicted_dissent['prediction'], border=True)
 
 # --- Bar Chart: Alignment vs. Dissent ---
 st.markdown("#### 📊 Alignment vs Dissent")

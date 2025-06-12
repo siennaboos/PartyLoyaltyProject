@@ -5,15 +5,19 @@ from backend.ml_models.logreg import predict
 logreg_bp = Blueprint('logreg', __name__)
 
 
-@logreg_bp.route('/prediction', methods=['GET'])
+@logreg_bp.route('/prediction', methods=['POST'])
 def get_prediction():
     try:
-        data = request.get_json(force=True)
+        print("entering log reg routes")
+        data = request.json
+        print(data)
+
+
         # log inputs
-        current_app.logger.info(f"Received prediction request for parties={data['Parties']}, procedure_type={data['Procedures']}")
+        current_app.logger.info(f"Received prediction request for parties={data['parties']}, procedure_type={data['procedures']}")
 
         # call model prediction function
-        result = predict(data['Parties'], data['Procedures'])
+        result = predict(data['parties'], data['procedures'])
 
         # return the result as json
         return jsonify({'prediction': round(result, 2)})

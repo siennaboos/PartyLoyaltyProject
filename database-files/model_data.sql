@@ -1,8 +1,4 @@
-DROP DATABASE IF EXISTS model_data;
-
-CREATE DATABASE IF NOT EXISTS model_data;
-
-USE model_data;
+USE loyalty_lines;
 
 
 
