@@ -1,10 +1,33 @@
-DROP DATABASE IF EXISTS model_data;
+USE loyalty_lines;
 
-CREATE DATABASE IF NOT EXISTS model_data;
+CREATE TABLE regressionWeights(
+   weightId     INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+   weight       DECIMAL(9, 8) NOT NULL
+);
 
-USE model_data;
-
-
+INSERT INTO regressionWeights (weight) VALUES (-2.09128883);
+INSERT INTO regressionWeights (weight) VALUES (-1.22760133);
+INSERT INTO regressionWeights (weight) VALUES (-0.69197317);
+INSERT INTO regressionWeights (weight) VALUES (-0.03461733);
+INSERT INTO regressionWeights (weight) VALUES (-2.0972986);
+INSERT INTO regressionWeights (weight) VALUES (0.51336762);
+INSERT INTO regressionWeights (weight) VALUES (0.08461103);
+INSERT INTO regressionWeights (weight) VALUES (-1.34616795);
+INSERT INTO regressionWeights (weight) VALUES (-1.94763428);
+INSERT INTO regressionWeights (weight) VALUES (0.85798632);
+INSERT INTO regressionWeights (weight) VALUES (0.3687682);
+INSERT INTO regressionWeights (weight) VALUES (1.10505938);
+INSERT INTO regressionWeights (weight) VALUES (0.37629189);
+INSERT INTO regressionWeights (weight) VALUES (0.50205102);
+INSERT INTO regressionWeights (weight) VALUES (0.73756208);
+INSERT INTO regressionWeights (weight) VALUES (0.21995354);
+INSERT INTO regressionWeights (weight) VALUES (0.76808414);
+INSERT INTO regressionWeights (weight) VALUES (0.74510615);
+INSERT INTO regressionWeights (weight) VALUES (0.37273045);
+INSERT INTO regressionWeights (weight) VALUES (0.14043745);
+INSERT INTO regressionWeights (weight) VALUES (1.12797179);
+INSERT INTO regressionWeights (weight) VALUES (0.05019656);
+INSERT INTO regressionWeights (weight) VALUES (0.7526279);
 
 CREATE TABLE regressionWeights(
    weightId     INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
