@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+import requests
 
 st.set_page_config(layout="wide")
 
@@ -27,7 +28,61 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 from modules.nav import SideBarLinks
+
+
+@st.cache_data
+def get_all_party_leaders():
+
+    response = requests.get("http://web-api:4000/u/users/role/1")
+    if response.status_code != 200:
+        st.error("Failed to access users")
+        st.stop()
+
+
+    users = response.json()
+
+    return users
+
+
+
+@st.cache_data
+def get_all_political_journalists():
+    response = requests.get("http://web-api:4000/u/users/role/2")
+    if response.status_code != 200:
+        st.error("Failed to access users")
+        st.stop()
+
+
+    users = response.json()
+
+    return users
+
+
+@st.cache_data
+def get_all_citizens():
+    response = requests.get("http://web-api:4000/u/users/role/3")
+    if response.status_code != 200:
+        st.error("Failed to access users")
+        st.stop()
+
+
+    users = response.json()
+
+    return users
+
 SideBarLinks()
+
+
+pls = get_all_party_leaders()
+pjs = get_all_political_journalists()
+czs = get_all_citizens()
+
+
+st.write(pls)
+st.write(pjs)
+st.write(czs)
+
+
 
 # Hero Section Layout
 left, right = st.columns([2, 1], gap="large")

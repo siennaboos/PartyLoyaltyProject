@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, make_response
 from mysql.connector import Error
 
+
 from backend.db_connection import db
 
 meps = Blueprint("meps", __name__)

@@ -27,19 +27,6 @@ CREATE TABLE IF NOT EXISTS mep (
     FOREIGN KEY (recommendedPartyID) REFERENCES political_party(partyID)
 );
 
-
-CREATE TABLE IF NOT EXISTS watchList (
-    watchListID INT PRIMARY KEY
-);
-
-CREATE TABLE IF NOT EXISTS mepToWatchList (
-    watchListID INT,
-    mepID INT,
-    PRIMARY KEY (watchListID, mepID),
-    FOREIGN KEY (watchListID) REFERENCES watchList(watchListID),
-    FOREIGN KEY (mepID) REFERENCES mep(mepID)
-);
-
 CREATE TABLE IF NOT EXISTS userRole (
     userRoleID INT PRIMARY KEY,
     userRoleName VARCHAR(255)
@@ -55,10 +42,16 @@ CREATE TABLE IF NOT EXISTS user (
     watchListID INT,
     userRoleID INT,
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
-    FOREIGN KEY (watchListID) REFERENCES watchList(watchListID),
     FOREIGN KEY (userRoleID) REFERENCES userRole(userRoleID)
 );
 
+CREATE TABLE IF NOT EXISTS watchList (
+    mepID INT,
+    userID INT,
+    PRIMARY KEY (userID, mepID),
+    FOREIGN KEY (userID) REFERENCES user(userID),
+    FOREIGN KEY (mepID) REFERENCES mep(mepID)
+);
 
 CREATE TABLE IF NOT EXISTS legislation (
     legislationID INT PRIMARY KEY,
