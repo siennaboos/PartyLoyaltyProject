@@ -14,10 +14,13 @@ st.markdown("""
     .block-container {
         padding: 3rem 5rem;
     }
+    .stButton {
+        padding-top: 19px;  /* Adjust as needed */
+    }
     .stButton>button {
         background-color: #365fc7;
         color: white;
-        padding: 0.6em 1.5em;
+        padding: 0.3em 1.5em;
         border-radius: 8px;
         font-size: 1rem;
         margin-bottom: 1rem;
@@ -77,13 +80,6 @@ pls = get_all_party_leaders()
 pjs = get_all_political_journalists()
 czs = get_all_citizens()
 
-
-st.write(pls)
-st.write(pjs)
-st.write(czs)
-
-
-
 # Hero Section Layout
 left, right = st.columns([2, 1], gap="large")
 
@@ -91,41 +87,46 @@ with left:
     st.markdown("## **Welcome to Loyalty Lines**")
     st.markdown("*Track EU votes. Understand MEP loyalty.*")
     
-    pl_option = st.selectbox(
-        "Log in as a Party Leader",
-        pls,
-        key = 0,
-    )
+    rows = st.columns([2, 1]) 
     
-    pj_option = st.selectbox(
-        "Log in as a Political Journalist",
-        pjs,
-        key = 1,
-    )
-    
-    cz_option = st.selectbox(
-        "Log in as a Citizen",
-        czs,
-        key = 2,
-    )
+    with rows[0]:
+        pl_option = st.selectbox(
+            "Log in as a Party Leader",
+            [pl['firstName'] + " " + pl['lastName'] for pl in pls],
+            key = 0,
+        )
+        
+        pj_option = st.selectbox(
+            "Log in as a Political Journalist",
+            [pj['firstName'] + " " + pj['lastName'] for pj in pjs],
+            key = 1,
+        )
+        
+        cz_option = st.selectbox(
+            "Log in as a Citizen",
+            [cz['firstName'] + " " + cz['lastName'] for cz in czs],
+            key = 2,
+        )
 
-    if st.button("Γιάννη Πούλος (Party Leader)", use_container_width=True):
-        st.session_state['authenticated'] = True
-        st.session_state['role'] = 'party_leader'
-        st.session_state['first_name'] = 'Yanni'
-        st.switch_page("pages/00_Party_Leader_Home.py")
 
-    if st.button("Camila Romero (Journalist)", use_container_width=True):
-        st.session_state['authenticated'] = True
-        st.session_state['role'] = 'political_journalist'
-        st.session_state['first_name'] = 'Camila'
-        st.switch_page("pages/10_Political_Journalist_Home.py")
+    with rows[1]:
+        if st.button("Log in", key=90, use_container_width=True):
+            st.session_state['authenticated'] = True
+            st.session_state['role'] = 'party_leader'
+            st.session_state['name'] = pl_option
+            st.switch_page("pages/00_Party_Leader_Home.py")
 
-    if st.button("Greg Gerborg (Citizen)", use_container_width=True):
-        st.session_state['authenticated'] = True
-        st.session_state['role'] = 'citizen'
-        st.session_state['first_name'] = 'Greg'
-        st.switch_page("pages/20_Citizen_Home.py")
+        if st.button("Log in", key=91, use_container_width=True):
+            st.session_state['authenticated'] = True
+            st.session_state['role'] = 'political_journalist'
+            st.session_state['name'] = pl_option
+            st.switch_page("pages/10_Political_Journalist_Home.py")
+
+        if st.button("Log in", key=92, use_container_width=True):
+            st.session_state['authenticated'] = True
+            st.session_state['role'] = 'citizen'
+            st.session_state['name'] = cz_option
+            st.switch_page("pages/20_Citizen_Home.py")
 
 with right:
     st.image("assets/blogo.png", width=400)

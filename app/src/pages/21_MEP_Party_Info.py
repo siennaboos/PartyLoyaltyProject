@@ -8,7 +8,6 @@ st.set_page_config(layout = 'wide')
 
 SideBarLinks()
 
-import streamlit as st
 import pandas as pd
 
 st.title("🧑‍⚖️ MEPs & Party Profiles")
