@@ -90,6 +90,24 @@ left, right = st.columns([2, 1], gap="large")
 with left:
     st.markdown("## **Welcome to Loyalty Lines**")
     st.markdown("*Track EU votes. Understand MEP loyalty.*")
+    
+    pl_option = st.selectbox(
+        "Log in as a Party Leader",
+        pls,
+        key = 0,
+    )
+    
+    pj_option = st.selectbox(
+        "Log in as a Political Journalist",
+        pjs,
+        key = 1,
+    )
+    
+    cz_option = st.selectbox(
+        "Log in as a Citizen",
+        czs,
+        key = 2,
+    )
 
     if st.button("Γιάννη Πούλος (Party Leader)", use_container_width=True):
         st.session_state['authenticated'] = True
