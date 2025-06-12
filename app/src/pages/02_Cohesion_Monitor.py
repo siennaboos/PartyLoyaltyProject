@@ -15,11 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import json
+import plotly.express as px
 
 SideBarLinks()
-
-
-# --- Sidebar Navigation ---
 
 # --- Page Setup ---
 st.title("📊 Percent Dissent Predictor")
@@ -27,7 +25,7 @@ st.markdown("Want to see how unified a party will be on a certain type of vote? 
 " to predict percent dissent.")
 
 # --- Party and Procedure Type Selection ---
-st.markdown("#### 🏛️ Select Parties")
+st.markdown("#### 🏛️ Select Parties and Procedure Types")
 party_dict = {
     "European Conservatives and Reformists": "ECR",
     "European People's Party": "EPP",
@@ -61,20 +59,11 @@ procedure_dict = {
 selected_parties = st.multiselect("Included Parties", party_dict.keys(), default=None)
 selected_procedures = st.multiselect("Included Procedure Types", procedure_dict.keys(), default=None)
 
-# --- Dashboard Charts ---
-chart_col1, chart_col2 = st.columns(2)
-
-# Make Prediction
-st.write(selected_parties)
-st.write(selected_procedures)
-
 input = {
-    'parties' : selected_parties,
-    'procedures' : selected_procedures
+    'parties' : [party_dict[party] for party in selected_parties],
+    'procedures' : [procedure_dict[procedure] for procedure in selected_procedures]
 }
 
-
-logger.info("bruh")
 logger.info(selected_procedures)
 
 response = requests.post(f"http://web-api:4000/l/prediction", json=input)
@@ -85,29 +74,52 @@ if response.status_code != 200:
 
 predicted_dissent = response.json()
 
-# Displaying dissent prediction (mock rn)
+# Displaying dissent prediction
 st.markdown("#### 📈 Predicted Dissent From Party Majority")
-st.metric('Percent Dissent', predicted_dissent['prediction'], border=True)
+if st.button('Predict Dissent', use_container_width=False):
+    st.metric('Percent Dissent', predicted_dissent['prediction'], border=True)
 
 # --- Bar Chart: Alignment vs. Dissent ---
-st.markdown("#### 📊 Alignment vs Dissent")
-alignment = [round(data[p].mean(), 1) for p in selected_parties]
-dissent = [round(100 - val, 1) for val in alignment]
+st.markdown("#### 📊 Average Loyalty Score for Each Party")
+st.write('This visualization shows the average loyalty score for MEPs in every party in the EU. Loyalty scores are calculated based on dissent and alignment rates.')
+st.write('\'Dissent\' refers to the action of an MEP voting differently than the majority of MEPs in their formally affiliated party.')
 
-fig_bar = go.Figure(data=[
-    go.Bar(name='Alignment', x=selected_parties, y=alignment, marker_color='green'),
-    go.Bar(name='Dissent', x=selected_parties, y=dissent, marker_color='crimson')
-])
-fig_bar.update_layout(
-    barmode='group',
-    height=350,
-    margin=dict(l=10, r=10, t=30, b=20),
-    yaxis_title="% of Votes",
-    template="plotly_white",
-    legend_title="Vote Type"
-)
-st.plotly_chart(fig_bar, use_container_width=True)
+# ----------------------------
+# Load MEP data from API
+# ----------------------------
+resp = requests.get("http://web-api:4000/m/meps")
+meps = resp.json() if resp.status_code == 200 else []
+
+# ----------------------------
+# Build DataFrame with party info
+# ----------------------------
+mep_df = pd.DataFrame()
+for mep in meps:
+    try:
+        party_resp = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party')
+        party = party_resp.json().get("partyName", "Unknown")
+    except:
+        party = "Unknown"
+
+    row = pd.DataFrame([{
+        "mepID": mep["mepID"],
+        "party": party,
+        "loyalty": float(mep["loyaltyScore"]),
+    }])
+    mep_df = pd.concat([mep_df, row], ignore_index=True)
+
+mep_df.replace('European Peopleâ€™s Party', 'European Peoples\' Party', inplace=True)
+party_df = mep_df.groupby("party", as_index=False)["loyalty"].mean()
+
+
+fig = px.bar(party_df, x='party', y='loyalty', labels={'party': 'Party', 'loyalty': 'Average Loyalty Score'},
+    width=600, height=800)
+
+# Angle the x-axis labels
+fig.update_layout(xaxis_tickangle=-45)
+
+st.plotly_chart(fig, use_container_width=False)
 
 # --- Footer ---
 st.markdown("---")
-st.caption("Explore party cohesion trends across the EU Parliament — built with 💡 by your data team.")
+st.caption("Explore party cohesion trends across the EU Parliament — built by the Loyalty Lines data team 💡")

@@ -121,10 +121,13 @@ def predict(party, procedure_type):
 
     feature_dict = {key: 0.0 for key in feature_order}
     feature_dict['intercept'] = 1.0
-    feature_dict[f'party_{party}'] = 1.0
-    feature_dict[f'procedure_type_{procedure_type}'] = 1.0
+    for p in party:
+        feature_dict[f'party_{p}'] = 1.0
+    for procedure in procedure_type:
+        feature_dict[f'procedure_type_{procedure}'] = 1.0
 
     input_vector = np.array([feature_dict[f] for f in feature_order])
+    print(input_vector)
 
     # predict!
     prediction = 1 / (1 + np.exp(-np.dot(params_array, input_vector)))
