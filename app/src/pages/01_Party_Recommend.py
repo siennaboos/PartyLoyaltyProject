@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import requests
 
+
+from modules.nav import SideBarLinks
+SideBarLinks()
+
 st.title("Find Your Top 10 MEP Matches")
 
 # User-friendly input fields

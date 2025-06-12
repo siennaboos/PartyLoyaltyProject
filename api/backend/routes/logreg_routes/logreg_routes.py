@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from flask import current_app
-from ml_models import predict
+from backend.ml_models.logreg import predict
 
 logreg_bp = Blueprint('customer', __name__, url_prefix='/l')
 
