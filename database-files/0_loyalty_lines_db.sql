@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS mep (
     contactInformation VARCHAR(255),
     countryOfOrigin VARCHAR(255),
     loyaltyScore DECIMAL(3, 1),
+    percentDisagree VARCHAR(100),
+    percentTurnout VARCHAR(100),
     partyID INT,
     recommendedPartyID INT,
     voteForPct DECIMAL(5, 2),
