@@ -28,7 +28,7 @@ def PartyReccomenderNav():
 
 
 def PartyCohesionNav():
-    st.sidebar.page_link("pages/02_Cohesion_Monitor.py", label="Party Cohesion Monitor", icon="📈")
+    st.sidebar.page_link("pages/03_Graph.py", label="Watch List", icon="📈")
 
 
 ## ------------------------ Examples for Role of political_journalist ------------------------

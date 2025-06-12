@@ -6,97 +6,96 @@ from modules.nav import SideBarLinks
 
 # Setup
 SideBarLinks()
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+st.markdown("""
+    <style>
+    html, body, [class*="css"]  {
+        font-family: 'Georgia', serif !important;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #222;
+    }
+
+    h1, h2, h3, h4 {
+        font-family: 'Georgia', serif !important;
+    }
+
+    .block-container {
+        padding: 2rem 3rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+# Title and Instructions
 st.title("📄 MEP Party Loyalty Records")
-st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
+st.markdown("Select an MEP to see their loyalty breakdown and photo.")
 
-# ----------------------------
-# Load MEPs
-# ----------------------------
-response = requests.get("http://web-api:4000/m/meps")
-if response.status_code != 200:
-    st.error("Failed to load MEPs.")
-    st.stop()
+# Load Photo CSV – place the CSV near this script or adjust accordingly
+photo_df = pd.read_csv("mep_photo.csv")  # <-- move here if needed
 
-meps = response.json()
 
-# ----------------------------
-# Build DataFrame with party info
-# ----------------------------
-rows = []
+# call backend api and get mep info
+resp = requests.get("http://web-api:4000/m/meps")
+
+meps = None
+if resp.status_code == 200:
+    meps = resp.json()
+
+
+# # MEP Data – mock or real
+mep_df = pd.DataFrame()
 for mep in meps:
-    party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
-    party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
+    party = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party').json()["partyName"]
 
-    rows.append({
-        "mepID": mep["mepID"],
-        "name": mep["name"],
-        "party": party_name,
-        "country": mep["countryOfOrigin"],
-        "loyaltyScore": mep["loyaltyScore"],
-        "photoURL": mep.get("photoURL")
-    })
+    df2 = pd.DataFrame([{"name": mep["name"],
+                          "Party": party,
+                        "Country": mep["countryOfOrigin"],
+                        "Overall Loyalty Score": mep["loyaltyScore"],
+                        "% Agreed": 72,
+                        "% Dissented": 28,
+                        "% Did Not Vote": 8},])
+    mep_df = pd.concat([mep_df, df2], ignore_index=True)
 
-df = pd.DataFrame(rows)
 
-# ----------------------------
-# MEP Selection
-# ----------------------------
-selected_name = st.selectbox("Select MEP", df["name"])
-selected = df[df["name"] == selected_name].iloc[0]
 
-# ----------------------------
-# Display Headshot & Details
-# ----------------------------
+
+photo_df = pd.read_csv("mep_photo.csv")  
+
+# Dropdown to select MEP
+selected_mep = st.selectbox("Select MEP", mep_df["name"])
+row = mep_df[mep_df["name"] == selected_mep].iloc[0]
+
+# Match photo by MEP ID
+# photo_url = photo_df.loc[photo_df["mepID"] == row["mepID"], "photo_url"].values[0]
+photo_url = "https://www.europarl.europa.eu/mepphoto/96834.jpg" # temporarily hardcoded
+
+# Layout for photo + stats
 col1, col2 = st.columns([1, 3])
 with col1:
-    if selected["photoURL"]:
-        st.image(selected["photoURL"], width=160, caption=selected_name)
-    else:
-        st.write("No photo available.")
+    st.image(photo_url, caption=selected_mep, width=160)
 
 with col2:
-    st.subheader(selected_name)
-    st.markdown(f"**Party**: {selected['party']}")
-    st.markdown(f"**Country**: {selected['country']}")
-    st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
+    st.subheader(selected_mep)
+    st.markdown(f"**Party**: {row['Party']}")
+    st.markdown(f"**Country**: {row['Country']}")
+    st.markdown(f"**Overall Loyalty Score**: {row['Overall Loyalty Score']}%")
 
-# ----------------------------
-# Fetch Score Breakdown from API
-# ----------------------------
-response = requests.get("http://web-api:4000/b/alignment-dissent")  # update route if different
+# Voting Record Breakdown
+st.markdown("### Voting Record Breakdown")
+labels = ["Agreed", "Dissented", "Did Not Vote"]
+values = [row["% Agreed"], row["% Dissented"], row["% Did Not Vote"]]
 
-if response.status_code != 200:
-    st.error("Failed to load alignment data.")
-    st.stop()
+fig, ax = plt.subplots()
+ax.bar(labels, values, color=["#4CAF50", "#F44336", "#9E9E9E"])
+ax.set_ylabel("% of Votes")
+ax.set_ylim(0, 100)
+st.pyplot(fig)
 
-data = response.json()  # Expecting list of dicts like {"party": ..., "alignment": ..., "dissent": ...}
-
-df = pd.DataFrame(data)
-
-# Filter for selected_parties
-df = df[df["party"].isin(selected_parties)]
-
-# -----------------------------------------
-# Plot bar chart
-# -----------------------------------------
-with chart_col2:
-    st.markdown("#### 📊 Alignment vs Dissent")
-
-    fig_bar = go.Figure(data=[
-        go.Bar(name='Alignment', x=df['party'], y=df['alignment'], marker_color='green'),
-        go.Bar(name='Dissent', x=df['party'], y=df['dissent'], marker_color='crimson')
-    ])
-    fig_bar.update_layout(
-        barmode='group',
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% of Votes",
-        template="plotly_white",
-        legend_title="Vote Type"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
-
-# ----------------------------
 # Footer
 # ----------------------------
 st.markdown("---")

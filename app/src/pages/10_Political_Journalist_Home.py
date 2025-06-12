@@ -24,9 +24,3 @@ if st.button('Party Cohesion Monitor',
              type='primary',
              use_container_width=True):
   st.switch_page('pages/12_Party_Cohesion_Monitor.py')
-
-if st.button("Party Recommender",
-             type='primary',
-             use_container_width=True):
-  st.switch_page('pages/13_Recommender.py')
-  

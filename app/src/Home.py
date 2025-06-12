@@ -1,41 +1,63 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import streamlit as st
 from PIL import Image
+import time
 
+from modules.nav import SideBarLinks
+
+# Set layout to wide
 st.set_page_config(layout="wide")
 
-# CSS Styling
+# Show appropriate sidebar links for the current user
+SideBarLinks()
+
+# --- Add CSS for blue buttons ---
 st.markdown("""
     <style>
-    html, body, [class*="css"] {
-        font-family: 'sans-serif' !important;
-        background-color: #f0f4fb;
-    }
-    .block-container {
-        padding: 3rem 5rem;
-    }
-    .stButton>button {
-        background-color: #365fc7;
+    div.stButton > button {
+        background-color: #3366cc;
         color: white;
-        padding: 0.6em 1.5em;
+        padding: 10px 24px;
+        border: none;
         border-radius: 8px;
-        font-size: 1rem;
-        margin-bottom: 1rem;
+        font-size: 16px;
+        width: 100%;
     }
-    .stButton>button:hover {
-        background-color: #2e4da5;
+    div.stButton > button:hover {
+        background-color: #264d99;
+        color: white;
     }
     </style>
 """, unsafe_allow_html=True)
-from modules.nav import SideBarLinks
-SideBarLinks()
 
-# Hero Section Layout
+# --- Typewriter animation function ---
+def typewriter(text: str, speed: int):
+    tokens = text.split()
+    container = st.empty()
+    for index in range(len(tokens) + 1):
+        curr_full_text = " ".join(tokens[:index])
+        container.markdown(
+            f"<h1 style='text-align: left; font-size: 48px;'>{curr_full_text}</h1>",
+            unsafe_allow_html=True
+        )
+        time.sleep(1 / speed)
+
+# --- Hero Section Layout ---
 left, right = st.columns([2, 1], gap="large")
 
 with left:
-    st.markdown("## **Welcome to Loyalty Lines**")
-    st.markdown("*Track EU votes. Understand MEP loyalty.*")
+    # Title with typewriter effect
+    typewriter("Welcome to Loyalty Lines", speed=20)
 
+    # Subtitle
+    st.markdown(
+        "<p style='font-size: 20px; font-style: italic;'>Track EU votes. Understand MEP loyalty.</p>",
+        unsafe_allow_html=True
+    )
+
+    # Navigation buttons
     if st.button("Γιάννη Πούλος (Party Leader)", use_container_width=True):
         st.session_state['authenticated'] = True
         st.session_state['role'] = 'party_leader'
