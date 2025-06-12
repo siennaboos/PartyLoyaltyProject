@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import logging
 logger = logging.getLogger(__name__)
 import streamlit as st
@@ -10,8 +9,6 @@ from modules.nav import SideBarLinks
 
 import plotly.graph_objects as go
 
-import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -92,5 +89,3 @@ with chart_col2:
 # --- Footer ---
 st.markdown("---")
 st.caption("Explore party cohesion trends across the EU Parliament — built with 💡 by your data team.")
-=======
->>>>>>> 8ffc12fc0012fc07dc2a39584a6cf5ac778f7199

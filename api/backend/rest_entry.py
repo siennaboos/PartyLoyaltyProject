@@ -9,6 +9,7 @@ from backend.routes.mep_routes.mep_routes import meps
 from backend.routes.users_routes.users_routes import users
 from backend.routes.party_routes.party_routes import parties
 from backend.routes.recommender_routes.recommendation_routes import recommendation
+from backend.routes.watchlist_routes.watchlist_routes import watchlists
 from backend.routes.recommender_routes.recommendation_bp_routes import recommender_bp
 from backend.routes.logreg_routes.logreg_routes import logreg_bp
 
@@ -52,6 +53,7 @@ def create_app():
     app.register_blueprint(users, url_prefix="/u")
     app.register_blueprint(parties, url_prefix="/p")
     app.register_blueprint(recommendation, url_prefix='/r')
+    app.register_blueprint(watchlists, url_prefix='/w')
     app.register_blueprint(recommender_bp, url_prefix='/b')
     app.register_blueprint(logreg_bp, url_prefix='/l')
 

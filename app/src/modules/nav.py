@@ -21,7 +21,7 @@ def PartyLeaderHomeNav():
     )
 
 
-def PartyReccomenderNav():
+def PartyRecommenderNav():
     st.sidebar.page_link(
         "pages/01_Party_Recommend.py", label="Party Recruitment Dashboard", icon="🧲"
     )
@@ -29,6 +29,9 @@ def PartyReccomenderNav():
 
 def PartyCohesionNav():
     st.sidebar.page_link("pages/02_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="📈")
+
+def MEPWatchlistNav():
+    st.sidebar.page_link("pages/03_MEP_Watchlist.py", label="MEP Watchlist", icon="🔍")
 
 
 ## ------------------------ Examples for Role of political_journalist ------------------------
@@ -57,8 +60,11 @@ def CitizenHomeNav():
 def MEPInfoNav():
     st.sidebar.page_link("pages/21_MEP_Party_Info.py", label="MEP & Party Info", icon="🏢")
 
-def CountryRecommenderNav():
-    st.sidebar.page_link("pages/22_MEP_Match.py", label="Country Explorer", icon="🌍")
+def MEPComparisonNav():
+    st.sidebar.page_link("pages/22_MEP_Comparison.py", label="Country Explorer", icon="🆚")
+
+def MEPMatchNav():
+    st.sidebar.page_link("pages/23_MEP_Match.py", label="Country Explorer", icon="🌍")
 
 
 
@@ -86,8 +92,9 @@ def SideBarLinks(show_home=False):
         # Show World Bank Link and Map Demo Link if the user is a political strategy advisor role.
         if st.session_state["role"] == "party_leader":
             PartyLeaderHomeNav()
-            PartyReccomenderNav()
+            PartyRecommenderNav()
             PartyCohesionNav()
+            MEPWatchlistNav()
 
         # If the user role is usaid worker, show the Api Testing page
         if st.session_state["role"] == "political_journalist":
@@ -100,7 +107,8 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "citizen":
             CitizenHomeNav()
             MEPInfoNav()
-            CountryRecommenderNav()
+            MEPComparisonNav()
+            MEPMatchNav()
 
     # Always show the About page at the bottom of the list of links
     AboutPageNav()
