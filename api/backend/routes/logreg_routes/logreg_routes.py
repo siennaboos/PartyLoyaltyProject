@@ -1,18 +1,19 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask import current_app
-from ml_models import predict
+from backend.ml_models.logreg import predict
 
-logreg_bp = Blueprint('customer', __name__, url_prefix='/l')
+logreg_bp = Blueprint('logreg', __name__)
 
 
-@logreg_bp.route('/prediction/<party>/<procedure_type>', methods=['GET'])
-def get_prediction(party, procedure_type):
+@logreg_bp.route('/prediction', methods=['GET'])
+def get_prediction():
     try:
+        data = request.get_json(force=True)
         # log inputs
-        current_app.logger.info(f"Received prediction request for party={party}, procedure_type={procedure_type}")
+        current_app.logger.info(f"Received prediction request for parties={data['Parties']}, procedure_type={data['Procedures']}")
 
         # call model prediction function
-        result = predict(party, procedure_type)
+        result = predict(data['Parties'], data['Procedures'])
 
         # return the result as json
         return jsonify({'prediction': round(result, 2)})

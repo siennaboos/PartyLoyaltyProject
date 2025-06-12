@@ -13,6 +13,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import requests
 
 SideBarLinks()
 
@@ -20,73 +21,85 @@ SideBarLinks()
 # --- Sidebar Navigation ---
 
 # --- Page Setup ---
-st.title("📊 Party Cohesion Dashboard")
-st.markdown("Track dissent and alignment across EU parties with visual insights.")
+st.title("📊 Percent Dissent Predictor")
+st.markdown("Want to see how unified a party will be on a certain type of vote? Choose a party and procedure type"
+" to predict percent dissent.")
 
-# --- Date Range and Party Selection ---
-col1, col2 = st.columns([1, 2])
-
-with col1:
-    st.markdown("#### 📅 Date Range")
-    st.date_input("Choose a time window:", [], key="date_range")
-
-with col2:
-    st.markdown("#### 🏛️ Select Parties")
-    parties = ["My Party", "X Party", "Y Party"]
-    selected_parties = st.multiselect("Included Parties", parties, default=parties)
-
-# --- Mock Data ---
-dates = pd.date_range(start="2023-01-01", periods=12, freq="M")
-data = {
-    "My Party": np.random.uniform(80, 95, size=12),
-    "X Party": np.random.uniform(65, 85, size=12),
-    "Y Party": np.random.uniform(70, 90, size=12)
+# --- Party and Procedure Type Selection ---
+st.markdown("#### 🏛️ Select Parties")
+party_dict = {
+    "European Conservatives and Reformists": "ECR",
+    "European People's Party": "EPP",
+    "Europe of Sovereign Nations": "ESN",
+    "The Left in the European Parliament – Nordic Green Left": "GUE/NGL",
+    "The Greens/European Free Alliance": "Greens/EFA",
+    "Identity and Democracy": "ID",
+    "Patriots for Europe": "Patriots for Europe",
+    "Renew Europe": "Renew",
+    "Progressive Alliance of Socialists and Democrats": "S&D"
 }
+
+procedure_dict = {
+    'Act for Codification Initiative': 'ACI',
+    'Approval procedure': 'APP',
+    'Budget procedure': 'BUD',
+    'Budgetary Control procedure': 'BUI',
+    'Consultation procedure': 'CNS',
+    'Ordinary legislative procedure (formerly co-decision)': 'COD',
+    'Delegated act': 'DEA',
+    'Discharge procedure': 'DEC',
+    'Own-initiative procedure': 'INI',
+    'Legislative initiative procedure': 'INL',
+    'Consent procedure (formerly assent)': 'NLE',
+    'Rule change or internal regulation': 'REG',
+    'Resolution procedure (Special)': 'RPS',
+    'Rule of Procedure (Organisational)': 'RSO',
+    'Non-legislative resolution': 'RSP'
+}
+
+selected_parties = st.multiselect("Included Parties", party_dict.keys(), default=None)
+selected_procedures = st.multiselect("Included Procedure Types", procedure_dict.keys(), default=None)
 
 # --- Dashboard Charts ---
 chart_col1, chart_col2 = st.columns(2)
 
-# --- Line Chart: Cohesion Over Time ---
-with chart_col1:
-    st.markdown("#### 📈 Alignment Over Time")
-    fig_line = go.Figure()
-    for party in selected_parties:
-        fig_line.add_trace(go.Scatter(
-            x=dates,
-            y=data[party],
-            mode='lines+markers',
-            name=party,
-            hovertemplate='%{y:.1f}% alignment<br>%{x|%b %Y}'
-        ))
-    fig_line.update_layout(
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% Votes Aligned",
-        xaxis_title="Date",
-        legend_title="Party",
-        template="plotly_white"
-    )
-    st.plotly_chart(fig_line, use_container_width=True)
+# Make Prediction
+input = {
+    'Parties' : selected_parties,
+    'Procedures' : selected_procedures
+}
+headers = {
+    "Content Type": "application/json"
+}
+
+response = requests.get(f"http://web-api:4000/l/prediction", headers=headers, params=input)
+st.write(response.status_code)
+st.write(response.json)
+
+predicted_dissent = response.json()
+
+# Displaying dissent prediction (mock rn)
+st.markdown("#### 📈 Predicted Dissent From Party Majority")
+st.metric('Percent Dissent', predicted_dissent, border=True)
 
 # --- Bar Chart: Alignment vs. Dissent ---
-with chart_col2:
-    st.markdown("#### 📊 Alignment vs Dissent")
-    alignment = [round(data[p].mean(), 1) for p in selected_parties]
-    dissent = [round(100 - val, 1) for val in alignment]
+st.markdown("#### 📊 Alignment vs Dissent")
+alignment = [round(data[p].mean(), 1) for p in selected_parties]
+dissent = [round(100 - val, 1) for val in alignment]
 
-    fig_bar = go.Figure(data=[
-        go.Bar(name='Alignment', x=selected_parties, y=alignment, marker_color='green'),
-        go.Bar(name='Dissent', x=selected_parties, y=dissent, marker_color='crimson')
-    ])
-    fig_bar.update_layout(
-        barmode='group',
-        height=350,
-        margin=dict(l=10, r=10, t=30, b=20),
-        yaxis_title="% of Votes",
-        template="plotly_white",
-        legend_title="Vote Type"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
+fig_bar = go.Figure(data=[
+    go.Bar(name='Alignment', x=selected_parties, y=alignment, marker_color='green'),
+    go.Bar(name='Dissent', x=selected_parties, y=dissent, marker_color='crimson')
+])
+fig_bar.update_layout(
+    barmode='group',
+    height=350,
+    margin=dict(l=10, r=10, t=30, b=20),
+    yaxis_title="% of Votes",
+    template="plotly_white",
+    legend_title="Vote Type"
+)
+st.plotly_chart(fig_bar, use_container_width=True)
 
 # --- Footer ---
 st.markdown("---")
