@@ -10,14 +10,15 @@ watchlists = Blueprint("watchlists", __name__)
 def get_all_users_watchlists(userID):
     current_app.logger.info('GET /user/<userID>/watchlists route entered')
     query = '''
-        SELECT watchListID, mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID
-        FROM user 
-        JOIN mepToWatchList as mtl ON user.watchListID = mtl.watchListID
-        JOIN mep ON mep.mepID = mtl.mepID
+        SELECT mep.mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID, photoURL
+        FROM mep 
+        JOIN watchList as wl ON mep.mepID = wl.mepID
+        WHERE wl.userID = %s
     '''
+
     cursor = db.get_db().cursor()
 
-    cursor.execute(query)
+    cursor.execute(query, (userID))
     retrieved_users = cursor.fetchall()
     cursor.close()
     
@@ -28,14 +29,14 @@ def get_all_users_watchlists(userID):
     return response
 
 
-@watchlists.route("/user/<int:userID>/watchlists", method=['POST'])
+@watchlists.route("/user/<int:userID>/watchlists", methods=['POST'])
 def add_user_to_watchlist(userID):
     current_app.logger.info('POST /user/<userID>/watchlists route entered')
 
     try:
         data = request.json
 
-        required_fields = ["mepID", "watchListID"]
+        required_fields = ["mepID"]
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
@@ -43,11 +44,11 @@ def add_user_to_watchlist(userID):
         cursor = db.get_db().cursor()
 
         query = """
-            INSERT INTO mepToWatchList (watchListID, mepID)
+            INSERT INTO watchList (mepID, userID)
             VALUES (%s, %s);
         """
 
-        cursor.execute(query, (data['mepID'], data['watchListID']))
+        cursor.execute(query, (data['mepID'], userID))
     
         db.get_db().commit()
         cursor.close()
@@ -58,31 +59,32 @@ def add_user_to_watchlist(userID):
         return jsonify({"error": str(e)}), 500
 
 
-@watchlists.route("/user/<int:mepID>/watchlists", method=['DELETE'])
-def remove_mep_from_watchlist(mepID):
-    current_app.logger.info('DELETE /user/<mepID>/watchlists route entered')
+@watchlists.route("/user/<int:userID>/watchlists", methods=['DELETE'])
+def remove_mep_from_watchlist(userID):
+    current_app.logger.info('DELETE /user/<userID>/watchlists route entered')
 
     try:
         data = request.json
 
-        required_fields = ["watchListID"]
+        required_fields = ["mepID"]
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
 
+
         cursor = db.get_db().cursor()
 
         query = """
-            DELETE FROM mepToWatchList
-            WHERE watchListID = %s
-              AND mepID = %s;
+            DELETE FROM watchList
+            WHERE mepID = %s
+              AND userID = %s;
         """
-        cursor.execute(query, (data["watchListID"], mepID))
+        cursor.execute(query, (data["mepID"], userID))
 
         db.get_db().commit()
         cursor.close()
 
-        return (jsonify({"message":  "MEP removed successfully", "mepID": mepID,"watchListID": data["watchListID"]}), 200,)
+        return (jsonify({"message":  "MEP removed successfully", "mepID": data['mepID']}), 200,)
 
     except Error as e:
         return jsonify({"error": str(e)}), 500
