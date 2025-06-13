@@ -94,12 +94,7 @@ def get_mep_loyalty_score(mepID):
         result = cursor.fetchone()
         cursor.close()
 
-<<<<<<< HEAD
-        if result:
-            # unpack tuple directly, no strings involved
-=======
         if result:            
->>>>>>> origin/main
             agreed, dissented, not_voted = result
             return jsonify({
                 "agreed": float(agreed),
