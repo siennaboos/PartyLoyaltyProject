@@ -87,16 +87,6 @@ pls = get_all_party_leaders()
 pjs = get_all_political_journalists()
 czs = get_all_citizens()
 
-<<<<<<< HEAD
-
-st.write(pls)
-st.write(pjs)
-st.write(czs)
-
-
-
-=======
->>>>>>> origin/main
 # Hero Section Layout
 left, right = st.columns([2, 1], gap="large")
 
