@@ -22,4 +22,4 @@ if st.button('MEP & Political Party Information',
 if st.button('Country Explorer', 
              type='primary',
              use_container_width=True):
-  st.switch_page('pages/22_MEP_Match.py')
+  st.switch_page('pages/23_MEP_Match.py')
