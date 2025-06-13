@@ -7,8 +7,7 @@ USE loyalty_lines;
 CREATE TABLE IF NOT EXISTS political_party (
     partyID INT AUTO_INCREMENT PRIMARY KEY,
     partyCohesionScore INT,
-    partyName VARCHAR(255),
-    partyDescription TEXT
+    partyName VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS mep (
@@ -17,24 +16,17 @@ CREATE TABLE IF NOT EXISTS mep (
     contactInformation VARCHAR(255),
     countryOfOrigin VARCHAR(255),
     loyaltyScore DECIMAL(3, 1),
+    percentDisagree VARCHAR(100),
+    percentTurnout VARCHAR(100),
     partyID INT,
     recommendedPartyID INT,
+    voteForPct DECIMAL(5, 2),
+    voteAgainstPct DECIMAL(5, 2),
+    voteAbstainPct DECIMAL(5, 2),
+    didNotVotePct DECIMAL(5, 2),
     photoURL VARCHAR(255),
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
     FOREIGN KEY (recommendedPartyID) REFERENCES political_party(partyID)
-);
-
-
-CREATE TABLE IF NOT EXISTS watchList (
-    watchListID INT PRIMARY KEY
-);
-
-CREATE TABLE IF NOT EXISTS mepToWatchList (
-    watchListID INT,
-    mepID INT,
-    PRIMARY KEY (watchListID, mepID),
-    FOREIGN KEY (watchListID) REFERENCES watchList(watchListID),
-    FOREIGN KEY (mepID) REFERENCES mep(mepID)
 );
 
 CREATE TABLE IF NOT EXISTS userRole (
@@ -52,10 +44,16 @@ CREATE TABLE IF NOT EXISTS user (
     watchListID INT,
     userRoleID INT,
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
-    FOREIGN KEY (watchListID) REFERENCES watchList(watchListID),
     FOREIGN KEY (userRoleID) REFERENCES userRole(userRoleID)
 );
 
+CREATE TABLE IF NOT EXISTS watchList (
+    mepID INT,
+    userID INT,
+    PRIMARY KEY (userID, mepID),
+    FOREIGN KEY (userID) REFERENCES user(userID),
+    FOREIGN KEY (mepID) REFERENCES mep(mepID)
+);
 
 CREATE TABLE IF NOT EXISTS legislation (
     legislationID INT PRIMARY KEY,
@@ -69,16 +67,3 @@ CREATE TABLE IF NOT EXISTS referenceDocument (
     PRIMARY KEY (legislationID, referenceID),
     FOREIGN KEY (legislationID) REFERENCES legislation(legislationID)
 );
-
-CREATE TABLE IF NOT EXISTS vote (
-    mepID INT,
-    legislationID INT,
-    description VARCHAR(255),
-    PRIMARY KEY (mepID, legislationID),
-    FOREIGN KEY (mepID) REFERENCES mep(mepID),
-    FOREIGN KEY (legislationID) REFERENCES legislation(legislationID)
-);
-
-
-
-

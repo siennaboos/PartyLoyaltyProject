@@ -4,16 +4,17 @@ from backend.db_connection import db
 
 users = Blueprint("users", __name__)
 
-@users.route("/users", methods=["GET"])
-def get_users():
-    current_app.logger.info('GET /users route entered')
+@users.route("/users/role/<int:userRoleID>", methods=["GET"])
+def get_users(userRoleID):
+    current_app.logger.info('GET /users/role/<userRoleID> route entered')
     query = '''
         SELECT userID, age, countryOfOrigin, firstName, lastName, partyID, watchListID, userRoleID
-        FROM user;
+        FROM user
+        WHERE userRoleID = %s;
     '''
     cursor = db.get_db().cursor()
 
-    cursor.execute(query)
+    cursor.execute(query, (userRoleID))
     retrieved_users = cursor.fetchall()
     cursor.close()
     

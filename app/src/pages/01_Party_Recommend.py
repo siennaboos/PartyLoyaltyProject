@@ -1,64 +1,51 @@
 import streamlit as st
-import requests
 import pandas as pd
-import matplotlib.pyplot as plt
+import requests
 
-st.title("Party Loyalty Recommender")
 
-st.title("Party Loyalty Recommender")
+from modules.nav import SideBarLinks
+SideBarLinks()
 
-# Input fields
-agree_current = st.slider("Current Party Agreement (%)", 0.0, 1.0, 0.7)
-attendance = st.slider("Attendance Rate (%)", 0.0, 1.0, 0.6)
-my_party = st.selectbox("Your Party", [
-    'European People’s Party', 'Renew Europe', 'Progressive Alliance of Socialists and Democrats',
-    'European Conservatives and Reformists', 'Non-attached Members', 'Europe of Sovereign Nations',
-    'The Left in the European Parliament – GUE/NGL', 'Greens/European Free Alliance', 
-    'Patriots for Europe', 'Identity and Democracy'
+st.title("Find Your Top 10 MEP Matches")
+
+# User-friendly input fields
+agree = st.slider("How much should they currently agree with their own party?", 0, 100, 70)
+attendance = st.slider("How often should they show up to vote?", 0, 100, 80)
+party = st.selectbox("Which party are you recruiting for?", [
+    'European People’s Party',
+    'Renew Europe',
+    'Progressive Alliance of Socialists and Democrats',
+    'European Conservatives and Reformists',
+    'Non-attached Members',
+    'Europe of Sovereign Nations',
+    'The Left in the European Parliament – GUE/NGL',
+    'Greens/European Free Alliance',
+    'Patriots for Europe',
+    'Identity and Democracy'
 ])
-my_party_pct = st.slider("Your Party Loyalty (%)", 0.0, 1.0, 0.7)
-candidate_party = st.selectbox("Candidate's Party", [
-    'European People’s Party', 'Renew Europe', 'Progressive Alliance of Socialists and Democrats',
-    'European Conservatives and Reformists', 'Non-attached Members', 'Europe of Sovereign Nations',
-    'The Left in the European Parliament – GUE/NGL', 'Greens/European Free Alliance', 
-    'Patriots for Europe', 'Identity and Democracy'
+party_pct = st.slider("How closely should they align with your party?", 0, 100, 80)
+country = st.selectbox("What country are they from?", [
+    'France', 'Germany', 'Italy', 'Belgium', 'Spain', 'Sweden', 'Netherlands'
 ])
-candidate_country = st.selectbox("Candidate's Country", [
-    'Belgium', 'Bulgaria', 'Croatia', 'Cyprus', 'Czechia', 'Denmark', 'Estonia', 'Finland', 'France',
-    'Germany', 'Greece', 'Hungary', 'Ireland', 'Italy', 'Latvia', 'Lithuania', 'Luxembourg', 'Malta',
-    'Netherlands', 'Poland', 'Portugal', 'Romania', 'Slovakia', 'Slovenia', 'Spain', 'Sweden'
-])
+country_weight = st.slider("How important is country match?", 0, 100, 10)
 
-if st.button("Get Recommendations"):
-    json_data = {
-        "percent_agree_current": float(agree_current),
-        "percent_attendance": float(attendance),
-        "my_party": str(my_party),
-        "my_party_percentage": float(my_party_pct),
-        "new_candidate_party": str(candidate_party),
-        "new_candidate_country": str(candidate_country)
-    }
+# Call API when button is clicked
 
-    response = requests.post("http://web-api:4000/r/generate", json=json_data)
+if st.button("Get Fixed Recommendations"):
+    try:
+        url = "http://web-api:4000/b/recommender?agree=70&attendance=80&party=Patriots%20for%20Europe&party_pct=80&country=France&country_weight=10"
+        response = requests.get(url)
+        # response.raise_for_status()  # ← this only runs if response is defined
 
-    if response.status_code == 200:
-        st.success("✅ Recommendations:")
-        st.dataframe(response.json())
-    else:
-        st.error("❌ Something went wrong: " + response.text)
-
-    if response.status_code == 200:
-        recs = pd.DataFrame(response.json())
-
-        st.write("### Top Recommended MEPs")
-        st.dataframe(recs)
-
-        st.write("### Cosine Similarity of Top 10 MEPs")
-        fig, ax = plt.subplots()
-        ax.barh(recs["first_name"] + " " + recs["last_name"], recs["mep_cosine"])
-        ax.invert_yaxis()
-        ax.set_xlabel("Cosine Similarity")
-        ax.set_title("Top MEP Matches")
-        st.pyplot(fig)
-    else:
-        st.error("Something went wrong with the backend call.")
+        data = response.json()
+        # Always wrap in a list if it's a single dict
+        if isinstance(data, dict):
+            df = pd.DataFrame([data])
+        else:
+            df = pd.DataFrame(data)
+        st.success("Results loaded successfully!")
+        st.subheader("Top 10 Matching MEPs")
+        st.dataframe(df)
+    
+    except requests.exceptions.RequestException as e:
+        st.error(f"Request failed: {e}")
