@@ -53,8 +53,6 @@ def get_all_party_leaders():
 
     return users
 
-
-
 @st.cache_data
 def get_all_political_journalists():
     response = requests.get("http://web-api:4000/u/users/role/2")
