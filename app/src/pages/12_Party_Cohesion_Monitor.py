@@ -16,7 +16,6 @@ party = st.selectbox("Select a political party:", [
     'Patriots for Europe', 'Renew', 'S&D'
 ])
 
-<<<<<<< HEAD
 st.title("📈 Party Cohesion Monitor")
 st.markdown("### _Track how party loyalty has changed over time._")
 st.markdown("This vizualization shows how the percent of dissenters has changed for each party as time has passed.")
@@ -50,23 +49,3 @@ fig = px.line(
 )
 
 st.plotly_chart(fig, use_container_width=True)
-=======
-procedure_type = st.selectbox("Select a procedure type:", [
-    'APP', 'BUD', 'BUI', 'CNS', 'COD', 'DEA', 'DEC', 'INI',
-    'INL', 'NLE', 'REG', 'RPS', 'RSO', 'RSP'
-])
-
-# --- Predict button ---
-if st.button("🔍 Predict Dissent Rate"):
-    url = f"http://web-api:4000/l/prediction/{party}/{procedure_type}"
-    
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            st.success(f"📊 Predicted Dissent Rate: **{data['prediction']:.2f}%**")
-        else:
-            st.error("❌ Prediction failed. Try again or check the server.")
-    except Exception as e:
-        st.error(f"⚠️ Error: {e}")
->>>>>>> origin/main
