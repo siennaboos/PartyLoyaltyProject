@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, make_response
 from mysql.connector import Error
 
+
 from backend.db_connection import db
 
 meps = Blueprint("meps", __name__)
@@ -9,7 +10,7 @@ meps = Blueprint("meps", __name__)
 def get_all_meps():
     current_app.logger.info('GET /meps route entered')
     query = '''
-        SELECT mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID, photoURL
+        SELECT mepID, name, countryOfOrigin, loyaltyScore, percentDisagree, percentTurnout, partyID, recommendedPartyID, photoURL
         FROM mep;
     '''
     cursor = db.get_db().cursor()
@@ -93,8 +94,7 @@ def get_mep_loyalty_score(mepID):
         result = cursor.fetchone()
         cursor.close()
 
-        if result:
-            # ✅ unpack tuple directly, no strings involved
+        if result:            
             agreed, dissented, not_voted = result
             return jsonify({
                 "agreed": float(agreed),
@@ -107,13 +107,14 @@ def get_mep_loyalty_score(mepID):
     except Error as e:
         current_app.logger.error(f"Database error: {e}")
         return jsonify({"error": str(e)}), 500
+        
 
 @meps.route("/mep/<int:mepID>/score", methods=['PUT'])
 def update_mep_loyalty_score(mepID):
     current_app.logger.info('PUT /mep/<int:mepID>/score route entered')
     
     try:
-        data = requests.json()
+        data = request.get_json()
         
         required_fields = ["loyaltyScore"]
         for field in required_fields:
@@ -121,7 +122,7 @@ def update_mep_loyalty_score(mepID):
                 return jsonify({"error": f"Missing required field: {field}"}), 400
         
         cursor = db.get_db().cursor()
-        query = "UPDATE mep SET loyaltyScore, %s WHERE mepID = %s"
+        query = "UPDATE mep SET loyaltyScore = %s WHERE mepID = %s"
 
         cursor.execute(query, (data['loyaltyScore'], mepID))
         cursor.close()

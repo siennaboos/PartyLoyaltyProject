@@ -1,78 +1,106 @@
 import streamlit as st
 import requests
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.express as px
 from modules.nav import SideBarLinks
 
-# Sidebar nav
-SideBarLinks()
 
-# Title
-st.title("📄 MEP Party Loyalty Records")
-st.markdown("Select an MEP to see their loyalty breakdown and photo.")
+@st.cache_data
+def get_mep_data():
+    # Load MEPs
+    response = requests.get("http://web-api:4000/m/meps")
+    if response.status_code != 200:
+        st.error("Failed to load MEPs.")
+        st.stop()
 
-# Load MEPs from API
-resp = requests.get("http://web-api:4000/m/meps")
-meps = resp.json() if resp.status_code == 200 else []
+    meps = response.json()
 
-# Build dataframe from MEPs
-mep_df = pd.DataFrame()
-for mep in meps:
-    party_resp = requests.get(f'http://web-api:4000/m/meps/{mep["mepID"]}/party')
-    party = party_resp.json().get("partyName", "Unknown")
-    mep_df = pd.concat([
-        mep_df,
-        pd.DataFrame([{
+    # Build DataFrame with party info
+    rows = []
+    for mep in meps:
+        party_resp = requests.get(f"http://web-api:4000/m/meps/{mep['mepID']}/party")
+        party_name = party_resp.json().get("partyName", "Unknown") if party_resp.status_code == 200 else "Unknown"
+
+        rows.append({
             "mepID": mep["mepID"],
             "name": mep["name"],
-            "Party": party,
-            "Country": mep["countryOfOrigin"],
-            "Overall Loyalty Score": mep["loyaltyScore"]
-        }])
-    ], ignore_index=True)
+            "party": party_name,
+            "country": mep["countryOfOrigin"],
+            "loyaltyScore": mep["loyaltyScore"],
+            "photoURL": mep.get("photoURL")
+        })
 
-# Dropdown
-selected_mep = st.selectbox("Select MEP", mep_df["name"])
-mep_row = mep_df[mep_df["name"] == selected_mep].iloc[0]
-mep_id = mep_row["mepID"]
+    return pd.DataFrame(rows)
 
-# Load dissent rate from API
-response = requests.get(f"http://web-api:4000/b/get-dissent-rate?id={mep_id}")
-dissent_data = response.json() if response.status_code == 200 else {}
 
-# Create photo URL using mepID (official EP pattern)
-photo_url = f"https://www.europarl.europa.eu/mepphoto/{mep_id}.jpg"
 
-# Two-column layout (photo/info left, chart right)
-col1, col2 = st.columns([1, 2])
 
+
+# Setup
+SideBarLinks()
+st.title("📄 MEP Party Loyalty Records")
+
+st.markdown("Search and select a Member of European Parliament (MEP) to view their party alignment, origin, loyalty score, and voting breakdown.")
+
+with st.spinner("Retrieving MEP information..."):
+    mep_data = get_mep_data()
+
+# MEP Selection
+selected_name = st.selectbox("Select MEP", mep_data["name"])
+selected = mep_data[mep_data["name"] == selected_name].iloc[0]
+
+# Display Headshot & Details
+
+col1, col2 = st.columns([1, 3])
 with col1:
-    st.image(photo_url, caption=selected_mep, width=160)
-    st.subheader(selected_mep)
-    st.markdown(f"**Party**: {mep_row['Party']}")
-    st.markdown(f"**Country**: {mep_row['Country']}")
-    st.markdown(f"**Overall Loyalty Score**: {mep_row['Overall Loyalty Score']}%")
+    if selected["photoURL"]:
+        st.image(selected["photoURL"], width=160, caption=selected_name)
+    else:
+        st.write("No photo available.")
 
 with col2:
-    st.markdown("### Voting Record Breakdown")
+    st.subheader(selected_name)
+    st.markdown(f"**Party**: {selected['party']}")
+    st.markdown(f"**Country**: {selected['country']}")
+    st.markdown(f"**Overall Loyalty Score**: {selected['loyaltyScore']}%")
 
-    if dissent_data:
-        dissent_rate = round(dissent_data['dissent_rate'], 2)
-        alignment_rate = round(100 - dissent_rate, 2)
+# Fetch Score Breakdown from API
+score_resp = requests.get(f"http://web-api:4000/m/mep/{selected['mepID']}/score")
+if score_resp.status_code == 200:
+    score_data = score_resp.json()
+    agreed = float(score_data.get("agreed", 0))
+    dissented = float(score_data.get("dissented", 0))
+    not_voted = float(score_data.get("notVoted", 0))
 
-        # Improved dual bar chart with Plotly
-        fig = go.Figure(data=[
-            go.Bar(name='Alignment', x=['Voting Behavior'], y=[alignment_rate], marker_color='green', width=0.4),
-            go.Bar(name='Dissent', x=['Voting Behavior'], y=[dissent_rate], marker_color='crimson', width=0.4)
-        ])
-        fig.update_layout(
-            barmode='stack',
-            yaxis=dict(title="Percentage (%)", range=[0, 100]),
-            title=dict(text="Alignment vs. Dissent Rate", font=dict(size=20)),
-            legend=dict(orientation="h", y=-0.2),
-            margin=dict(t=50, b=50),
-            height=400
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.error("Could not retrieve dissent rate.")
+
+
+
+
+
+    
+else:
+    st.warning("Voting breakdown unavailable.")
+    agreed, dissented, not_voted = 0, 0, 0
+
+# Voting Breakdown Chart
+st.markdown("### Voting Record Breakdown")
+
+chart_df = pd.DataFrame({
+    "Category": ["Agreed", "Dissented", "Did Not Vote"],
+    "Percentage": [agreed, dissented, not_voted]
+})
+
+fig = px.bar(
+    chart_df,
+    x="Category",
+    y="Percentage",
+    color="Category",
+    color_discrete_sequence=["#4CAF50", "#9449ba", "#9E9E9E"],
+    labels={"Percentage": "% of Votes"},
+)
+fig.update_layout(yaxis_range=[0, 100], showlegend=False)
+st.plotly_chart(fig)
+
+# Footer
+st.markdown("---")
+st.caption("Explore party loyalty and voting behavior of MEPs across the European Parliament.")

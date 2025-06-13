@@ -6,11 +6,8 @@
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
-import statsmodels.api as sm
 
 from backend.db_connection import db
 import numpy as np
@@ -104,20 +101,15 @@ def cross_validate(df):
     return r2
 
 def predict(party, procedure_type):
-    '''retrieve model parameters from the database and predict percent dissent'''
-    
-    # ✅ STEP 1: Set up DB connection properly
-    conn = db.get_db()
-    cursor = conn.cursor()
+    '''retrieve model parameters from the database and predict percent dissent
+    based on the input party and procedure_type'''
+    # load latest model weights from db
+    cursor = db.get_db().cursor()
+    query = 'SELECT weight FROM regressionWeights ORDER BY weightId'
+    cursor.execute(query)
 
-    # ✅ STEP 2: Log active DB
-    cursor.execute("SELECT DATABASE();")
-    db_name = cursor.fetchone()['DATABASE()']
-    current_app.logger.info(f"✅ CONNECTED TO DB: {db_name}")
-
-    # ✅ STEP 3: Get weights
-    cursor.execute("SELECT weight FROM regressionWeights ORDER BY weightId")
     rows = cursor.fetchall()
+
     params_array = np.array([float(row['weight']) for row in rows])
 
     current_app.logger.info(f'Model weights: {params_array}')
@@ -129,10 +121,13 @@ def predict(party, procedure_type):
 
     feature_dict = {key: 0.0 for key in feature_order}
     feature_dict['intercept'] = 1.0
-    feature_dict[f'party_{party}'] = 1.0
-    feature_dict[f'procedure_type_{procedure_type}'] = 1.0
+    for p in party:
+        feature_dict[f'party_{p}'] = 1.0
+    for procedure in procedure_type:
+        feature_dict[f'procedure_type_{procedure}'] = 1.0
 
     input_vector = np.array([feature_dict[f] for f in feature_order])
+    print(input_vector)
 
     # predict!
     prediction = 1 / (1 + np.exp(-np.dot(params_array, input_vector)))

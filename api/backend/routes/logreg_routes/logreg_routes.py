@@ -1,24 +1,27 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask import current_app
 from backend.ml_models.logreg import predict
 
-logreg_bp = Blueprint('customer', __name__)
+logreg_bp = Blueprint('logreg', __name__)
 
-@logreg_bp.route('/prediction/<party>/<procedure_type>', methods=['GET'])
-def get_prediction(party, procedure_type):
+
+@logreg_bp.route('/prediction', methods=['POST'])
+def get_prediction():
     try:
-        current_app.logger.info(f"Received prediction request for party={party}, procedure_type={procedure_type}")
+        print("entering log reg routes")
+        data = request.json
+        print(data)
 
-        # Call model prediction function
-        result = predict(party, procedure_type)
 
-        # Return result
-        
+        # log inputs
+        current_app.logger.info(f"Received prediction request for parties={data['parties']}, procedure_type={data['procedures']}")
+
+        # call model prediction function
+        result = predict(data['parties'], data['procedures'])
+
+        # return the result as json
         return jsonify({'prediction': round(result, 2)})
 
     except Exception as e:
-        import traceback
-        error_msg = traceback.format_exc()
-        current_app.logger.error(f"Prediction error: {e}\n{error_msg}")
+        current_app.logger.error(f"Prediction error: {e}")
         return jsonify({'error': 'Prediction failed'}), 500
-

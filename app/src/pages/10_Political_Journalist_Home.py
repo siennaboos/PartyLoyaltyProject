@@ -10,7 +10,7 @@ st.set_page_config(layout = 'wide')
 SideBarLinks()
 
 
-st.title(f"Welcome Political Journalist, {st.session_state['first_name']}.")
+st.title(f"Welcome Political Journalist, {st.session_state['name']}.")
 st.write('')
 st.write('')
 st.write('### What would you like to do today?')
