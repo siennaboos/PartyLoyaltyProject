@@ -1,4 +1,4 @@
-USE loyalty_lines
+USE loyalty_lines;
 
 
 CREATE TABLE IF NOT EXISTS TABLE_NAME(
@@ -19,7 +19,7 @@ country VARCHAR( 100 ),
 EuropeanPeoplesPartypercentage DECIMAL( 10 , 2 ),
 RenewEuropepercentage DECIMAL( 10 , 2 ),
 ProgressiveAllianceofSocialistsandDemocratspercentage DECIMAL( 10 , 2 ),
-EuropeanConservativesandReformistspercentage DECIMAL( 10 , 2 ),
+EuropeanConservativesandReformistspercentage DECIMAL( 10 , 2 ), 
 Non_attachedMemberspercentage DECIMAL( 10 , 2 ),
 EuropeofSovereignNationspercentage DECIMAL( 10 , 2 ),
 TheLeftintheEuropeanParliament_GUE_NGLpercentage DECIMAL( 10 , 2 ),
