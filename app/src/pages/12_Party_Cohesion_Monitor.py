@@ -1,20 +1,10 @@
 import streamlit as st
 import requests
-from sklearn.ensemble import RandomForestClassifier
 from streamlit_extras.app_logo import add_logo
 from modules.nav import SideBarLinks
 import plotly.express as px
 
 SideBarLinks()
-
-st.title("🧠 Party Dissent Predictor")
-st.markdown("Use logistic regression to estimate dissent likelihood for EU parties.")
-
-# --- Inputs ---
-party = st.selectbox("Select a political party:", [
-    'EPP', 'ESN', 'GUE/NGL', 'Greens/EFA', 'ID',
-    'Patriots for Europe', 'Renew', 'S&D'
-])
 
 st.title("📈 Party Cohesion Monitor")
 st.markdown("### _Track how party loyalty has changed over time._")
