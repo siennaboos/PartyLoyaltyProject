@@ -38,20 +38,14 @@ def MEPWatchlistNav():
 def PoliticalJournalistHomeNav():
     st.sidebar.page_link("pages/10_Political_Journalist_Home.py", label="Political Journalist Home", icon="👤")
 
-def LoyaltyRecordsNav():
-    st.sidebar.page_link("pages/11_MEP_Loyalty_Records.py", label="MEP Party Loyalty Records", icon="📄")
-
 
 def CohesionMonitorNav():
     st.sidebar.page_link(
         "pages/12_Party_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="🖥️"
 )
 
-def RecommenderNav():
-    st.sidebar.page_link(
-        "pages/13_Recommender.py", label= "Party Recomender", icon="📈"
-)
-
+def MEPComparisonNav():
+    st.sidebar.page_link("pages/13_MEP_Comparison.py", label="MEP Comparison", icon="🆚")
 
 #### ------------------------ citizen Role ------------------------
 def CitizenHomeNav():
@@ -60,8 +54,6 @@ def CitizenHomeNav():
 def MEPInfoNav():
     st.sidebar.page_link("pages/21_MEP_Party_Info.py", label="MEP & Party Info", icon="🏢")
 
-def MEPComparisonNav():
-    st.sidebar.page_link("pages/22_MEP_Comparison.py", label="MEP Comparison", icon="🆚")
 
 def MEPMatchNav():
     st.sidebar.page_link("pages/23_MEP_Match.py", label="MEP Matcher", icon="👥")
@@ -99,15 +91,13 @@ def SideBarLinks(show_home=False):
         # If the user role is usaid worker, show the Api Testing page
         if st.session_state["role"] == "political_journalist":
             PoliticalJournalistHomeNav()
-            LoyaltyRecordsNav()
             CohesionMonitorNav()
-            RecommenderNav()
+            MEPComparisonNav()
 
         # If the user is an administrator, give them access to the administrator pages
         if st.session_state["role"] == "citizen":
             CitizenHomeNav()
             MEPInfoNav()
-            MEPComparisonNav()
             MEPMatchNav()
 
     # Always show the About page at the bottom of the list of links
