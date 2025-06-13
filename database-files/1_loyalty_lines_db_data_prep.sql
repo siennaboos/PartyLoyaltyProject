@@ -42,7 +42,7 @@ INSERT INTO userRole(userRoleID, userRoleName)
 VALUES (3, "Citizen");
 
 -- PREARE USER PERSONAS
-INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
+INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID) 
 VALUES ("59", "Greece", "Yanni", "Polous", 1, 1),
 ("45", "Germany", "Anna", "Schmidt", 2, 1),
 ("38", "France", "Jean", "Dubois", 3, 1),
@@ -55,12 +55,8 @@ VALUES ("30", "Spain", "Camila", "Romero", 2),
 ("41", "Austria", "Karl", "Müller", 2),
 ("36", "Portugal", "Ines", "Fernandes", 2),
 ("33", "Belgium", "Tom", "Lemoine", 2),
-("22", "Czech Republic", "Petr", "Novák", 2);
-
-INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
-<<<<<<< HEAD
-VALUES ("23", "Switzerland", "Greg", "Gerborg", 3, 1),
-=======
+("22", "Czech Republic", "Petr", "Novák", 2); 
+INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID) 
 VALUES ("23", "Switzerland", "Greg", "Gerborg", 3, 3),
 ("60", "Hungary", "Ilona", "Toth", 2, 3),
 ("52", "Denmark", "Niels", "Christensen", 3, 3),
