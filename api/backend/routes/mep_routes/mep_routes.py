@@ -94,8 +94,12 @@ def get_mep_loyalty_score(mepID):
         result = cursor.fetchone()
         cursor.close()
 
+<<<<<<< HEAD
         if result:
             # unpack tuple directly, no strings involved
+=======
+        if result:            
+>>>>>>> origin/main
             agreed, dissented, not_voted = result
             return jsonify({
                 "agreed": float(agreed),
@@ -115,7 +119,7 @@ def update_mep_loyalty_score(mepID):
     current_app.logger.info('PUT /mep/<int:mepID>/score route entered')
     
     try:
-        data = requests.json()
+        data = request.get_json()
         
         required_fields = ["loyaltyScore"]
         for field in required_fields:
@@ -123,7 +127,7 @@ def update_mep_loyalty_score(mepID):
                 return jsonify({"error": f"Missing required field: {field}"}), 400
         
         cursor = db.get_db().cursor()
-        query = "UPDATE mep SET loyaltyScore, %s WHERE mepID = %s"
+        query = "UPDATE mep SET loyaltyScore = %s WHERE mepID = %s"
 
         cursor.execute(query, (data['loyaltyScore'], mepID))
         cursor.close()

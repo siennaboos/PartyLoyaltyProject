@@ -6,46 +6,130 @@ import requests
 from modules.nav import SideBarLinks
 SideBarLinks()
 
+
 st.title("Find Your Top 10 MEP Matches")
 
-# User-friendly input fields
-agree = st.slider("How much should they currently agree with their own party?", 0, 100, 70)
-attendance = st.slider("How often should they show up to vote?", 0, 100, 80)
-party = st.selectbox("Which party are you recruiting for?", [
-    'European People’s Party',
-    'Renew Europe',
-    'Progressive Alliance of Socialists and Democrats',
-    'European Conservatives and Reformists',
-    'Non-attached Members',
-    'Europe of Sovereign Nations',
-    'The Left in the European Parliament – GUE/NGL',
-    'Greens/European Free Alliance',
-    'Patriots for Europe',
-    'Identity and Democracy'
-])
-party_pct = st.slider("How closely should they align with your party?", 0, 100, 80)
-country = st.selectbox("What country are they from?", [
-    'France', 'Germany', 'Italy', 'Belgium', 'Spain', 'Sweden', 'Netherlands'
-])
-country_weight = st.slider("How important is country match?", 0, 100, 10)
+party_abbrevs = {
+   'European People’s Party': 'EPP',
+   'Renew Europe': 'RENEW',
+   'Progressive Alliance of Socialists and Democrats': 'SD',
+   'European Conservatives and Reformists': 'ECR',
+   'Non-attached Members': 'NI',
+   'Europe of Sovereign Nations': 'ESN',
+   'The Left in the European Parliament – GUE/NGL': 'GUE_NGL',
+   'Greens/European Free Alliance': 'GREEN_EFA',
+   'Patriots for Europe': 'PFE'
+}
 
-# Call API when button is clicked
 
-if st.button("Get Fixed Recommendations"):
-    try:
-        url = "http://web-api:4000/b/recommender?agree=70&attendance=80&party=Patriots%20for%20Europe&party_pct=80&country=France&country_weight=10"
-        response = requests.get(url)
-        # response.raise_for_status()  # ← this only runs if response is defined
+countries_url = 'http://web-api:4000/b/mep_countries'
+countries_response = requests.get(countries_url)
+countries_data = countries_response.json()
 
-        data = response.json()
-        # Always wrap in a list if it's a single dict
-        if isinstance(data, dict):
-            df = pd.DataFrame([data])
-        else:
-            df = pd.DataFrame(data)
-        st.success("Results loaded successfully!")
-        st.subheader("Top 10 Matching MEPs")
-        st.dataframe(df)
-    
-    except requests.exceptions.RequestException as e:
-        st.error(f"Request failed: {e}")
+
+countries_list = [item['country'] for item in countries_data]
+countries_list.insert(0, 'Not Specified')
+parties_list = ['European People’s Party', 'Renew Europe', 'Progressive Alliance of Socialists and Democrats',
+   'European Conservatives and Reformists', 'Europe of Sovereign Nations',
+   'The Left in the European Parliament – GUE/NGL', 'Greens/European Free Alliance',
+   'Patriots for Europe']
+
+
+user_party = st.selectbox('Your Party', parties_list)
+
+route_input_party = party_abbrevs[user_party]
+
+
+
+agree_current = st.slider("Current Party Alignment (%)", 0, 100, 40)
+agree_new_party = st.slider(f'{user_party} Alignment (%)', 0, 100, 70)
+attendance = st.slider("Attendance Rate (%)", 0, 100, 80)
+
+
+
+recruit_parties = [party for party in parties_list if party != user_party]
+recruit_parties.append('Non-attached Members')
+recruit_parties.insert(0, 'Not Specified')
+st.write('Optional Filters')
+
+
+recruit_party = st.selectbox('What party are they currently in?', recruit_parties)
+if recruit_party != 'Not Specified':
+   recruit_party = party_abbrevs[recruit_party]
+
+
+recruit_country = st.selectbox("What country are they from?", countries_list)
+
+
+url = "http://web-api:4000/b/active_mep_alignment_data"
+response = requests.get(url)
+data = response.json()
+df = pd.DataFrame(data)
+
+
+
+
+weights = []
+
+
+if 'weights_set' not in st.session_state:
+   st.session_state.weights_set = False
+
+
+if st.button('Add Feature Importance Values', type='primary'):
+   st.session_state.weights_set = True
+
+
+if st.session_state.weights_set:
+    st.write('#### Values must add up to 100!')
+
+
+    agree_current_weight = st.slider("Current Party Alignment Importance (%)", 0, 100, 50)
+    weights.append(agree_current_weight)
+    attendance_weight = st.slider("Attendance Rate Importance (%)", 0, 100, 50)
+    weights.append(attendance_weight)
+    agree_new_weight = st.slider(f"{user_party} Alignment Weight (%)", 0, 100, 50)
+    weights.append(agree_new_weight)
+
+
+    if recruit_party != 'Not Specified':
+        party_weight = st.slider("Party Importance (%)", 0, 100, 50)
+        weights.append(party_weight)
+  
+    if recruit_country != 'Not Specified':
+        country_weight = st.slider("Country Importance (%)", 0, 100, 50)
+        weights.append(country_weight)
+
+    if sum(weights) != 100:
+        st.warning('Feature Importance Values do not add up to 100')
+    else:
+        weights_str = str(weights).replace(" ", "")
+        weights_str = weights_str[:len(weights_str)-1]
+
+
+if st.button("Get Recommendations"):
+    base_url = f"http://web-api:4000/b/get_recs/{agree_current}/{attendance}/{route_input_party}/{agree_new_party}"
+    params = []
+
+
+    if recruit_party != 'Not Specified':
+        params.append(f"new_candidate_party={recruit_party}")
+    if recruit_country != 'Not Specified':
+        params.append(f"new_candidate_country={recruit_country}")
+    if weights:
+        params.append(f"weights={weights_str}")
+
+
+    if params:
+        query_string = "&".join(params)
+        full_url = f"{base_url}?{query_string}"
+    else:
+        full_url = base_url
+
+
+    response = requests.get(full_url)
+
+
+    recruits = pd.DataFrame(response.json())
+    recruits.rename(columns={f'{route_input_party} Alignment Rate': f'{user_party} Alignment Rate'}, inplace=True)
+    st.dataframe(recruits.drop(columns=['mep_dot_product', 'mep_cosine']))   
