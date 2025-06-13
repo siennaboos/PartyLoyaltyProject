@@ -20,7 +20,7 @@ if st.button('MEP Party Loyalty Records',
              use_container_width=True):
   st.switch_page('pages/11_MEP_Loyalty_Records.py')
 
-if st.button('Party Cohesion Monitor', 
+if st.button('Party Dissent Monitor', 
              type='primary',
              use_container_width=True):
   st.switch_page('pages/12_Party_Cohesion_Monitor.py')

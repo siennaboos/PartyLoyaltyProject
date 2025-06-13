@@ -53,7 +53,7 @@ input = {
     'procedures' : [procedure_dict[procedure] for procedure in selected_procedures]
 }
 
-logger.info(selected_procedures)
+# logger.info(selected_procedures)
 
 response = requests.post(f"http://web-api:4000/l/prediction", json=input)
 
@@ -111,6 +111,7 @@ st.plotly_chart(fig, use_container_width=False)
 
 # --- Footer ---
 st.markdown("---")
+<<<<<<< HEAD
 st.caption("Explore party cohesion trends across the EU Parliament — built by the Loyalty Lines data team 💡")
 import requests
 from modules.nav import SideBarLinks
@@ -212,3 +213,6 @@ if all_meps:
         add_to_watchlist(mep_options[selection])
 else:
     st.warning("⚠️ No MEPs available.")
+=======
+st.caption("Explore party cohesion trends across the EU Parliament — built by the Loyalty Lines data team 💡")
+>>>>>>> cohesion_ml

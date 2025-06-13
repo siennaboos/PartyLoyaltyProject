@@ -41,7 +41,7 @@ def PoliticalJournalistHomeNav():
 
 def CohesionMonitorNav():
     st.sidebar.page_link(
-        "pages/12_Party_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="🖥️"
+        "pages/12_Party_Cohesion_Monitor.py", label="Party Dissent Monitor", icon="🖥️"
 )
 
 def MEPComparisonNav():
@@ -54,17 +54,9 @@ def CitizenHomeNav():
 def MEPInfoNav():
     st.sidebar.page_link("pages/21_MEP_Party_Info.py", label="MEP & Party Info", icon="🏢")
 
-<<<<<<< HEAD
-def MEPComparisonNav():
-    st.sidebar.page_link("pages/22_MEP_Comparison.py", label="Country Explorer", icon="🆚")
-
-def MEPMatchNav():
-    st.sidebar.page_link("pages/23_MEP_Match.py", label="Country Explorer", icon="🌍")
-=======
 
 def MEPMatchNav():
     st.sidebar.page_link("pages/23_MEP_Match.py", label="MEP Matcher", icon="👥")
->>>>>>> origin/main
 
 
 
@@ -106,10 +98,6 @@ def SideBarLinks(show_home=False):
         if st.session_state["role"] == "citizen":
             CitizenHomeNav()
             MEPInfoNav()
-<<<<<<< HEAD
-            MEPComparisonNav()
-=======
->>>>>>> origin/main
             MEPMatchNav()
 
     # Always show the About page at the bottom of the list of links

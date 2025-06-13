@@ -7,7 +7,7 @@ from backend.db_connection import db
 time = Blueprint("time", __name__)
 
 @time.route("/times", methods=['GET'])
-def get_all_meps():
+def get_info():
     current_app.logger.info('GET /time route entered')
     query = '''
         SELECT party, percent_dissent, adjusted_week

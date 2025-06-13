@@ -22,7 +22,7 @@ if st.button('Percent Dissent Predictor',
              use_container_width=True):
   st.switch_page('pages/02_Cohesion_Monitor.py')
 
-if st.button('Coalition Builder', 
+if st.button('MEP Watchlist', 
              type='primary',
              use_container_width=True):
   st.switch_page('pages/03_MEP_Watchlist.py')
