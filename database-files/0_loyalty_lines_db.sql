@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS mep (
     recommendedPartyID INT,
     voteForPct DECIMAL(5, 2),
     voteAgainstPct DECIMAL(5, 2),
-    voteAbstainPct DECIMAL(5, 2),
     didNotVotePct DECIMAL(5, 2),
     photoURL VARCHAR(255),
     FOREIGN KEY (partyID) REFERENCES political_party(partyID),
@@ -53,17 +52,4 @@ CREATE TABLE IF NOT EXISTS watchList (
     PRIMARY KEY (userID, mepID),
     FOREIGN KEY (userID) REFERENCES user(userID),
     FOREIGN KEY (mepID) REFERENCES mep(mepID)
-);
-
-CREATE TABLE IF NOT EXISTS legislation (
-    legislationID INT PRIMARY KEY,
-    title VARCHAR(255),
-    dateOfVote DATE
-);
-
-CREATE TABLE IF NOT EXISTS referenceDocument (
-    legislationID INT,
-    referenceID INT,
-    PRIMARY KEY (legislationID, referenceID),
-    FOREIGN KEY (legislationID) REFERENCES legislation(legislationID)
 );
