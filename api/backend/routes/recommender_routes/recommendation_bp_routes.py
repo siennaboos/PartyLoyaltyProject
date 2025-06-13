@@ -118,3 +118,70 @@ def get_dissent_rate():
         'party': mep_data['party'],
         'dissent_rate': mep_data['percent_dissent_current']
     })
+
+@recommender_bp.route('/get-country-heatmap', methods=['GET'])
+def get_country_heatmap():
+    try:
+        # Frontend to CSV mapping
+        party_name_map = {
+            "European People's Party": "European People’s Party",
+            "Progressive Alliance of Socialists and Democrats": "Progressive Alliance of Socialists and Democrats",
+            "Renew Europe": "Renew Europe",
+            "Greens/European Free Alliance": "Greens/European Free Alliance",
+            "The Left (GUE/NGL)": "The Left in the European Parliament – GUE/NGL",
+            "European Conservatives and Reformists": "European Conservatives and Reformists",
+            "Identity and Democracy": "Identity and Democracy",
+            "Non-Inscrits": "Non-attached Members"
+        }
+
+        agree = float(request.args.get('agree'))
+        attendance = float(request.args.get('attendance'))
+        party_display = request.args.get('party')
+        party = party_name_map.get(party_display)
+
+        if not party:
+            return jsonify({'error': f"Unsupported party: {party_display}"}), 400
+
+        # Load data
+        csv_path = os.path.join(os.getcwd(), 'backend/ml_models/active_members.csv')
+        df = pd.read_csv(csv_path)
+
+        # Filter to just this party
+        df_party = df[df["party"] == party].copy()
+
+        # EU ISO mappings
+        eu_countries = {
+            'Austria': 'AUT', 'Belgium': 'BEL', 'Bulgaria': 'BGR', 'Croatia': 'HRV', 'Cyprus': 'CYP',
+            'Czechia': 'CZE', 'Denmark': 'DNK', 'Estonia': 'EST', 'Finland': 'FIN', 'France': 'FRA',
+            'Germany': 'DEU', 'Greece': 'GRC', 'Hungary': 'HUN', 'Ireland': 'IRL', 'Italy': 'ITA',
+            'Latvia': 'LVA', 'Lithuania': 'LTU', 'Luxembourg': 'LUX', 'Malta': 'MLT', 'Netherlands': 'NLD',
+            'Poland': 'POL', 'Portugal': 'PRT', 'Romania': 'ROU', 'Slovakia': 'SVK', 'Slovenia': 'SVN',
+            'Spain': 'ESP', 'Sweden': 'SWE'
+        }
+
+        results = []
+
+        for country, iso in eu_countries.items():
+            df_country = df_party[df_party["country"] == country]
+
+            if df_country.empty:
+                continue
+
+            avg_dissent = df_country["percent_dissent_current"].mean()
+
+            if pd.isna(avg_dissent):
+                continue
+
+            score = (avg_dissent / (agree * 100 if agree > 0 else 1)) * (attendance * 100)
+
+            results.append({
+                "country": country,
+                "iso_alpha": iso,
+                "avg_dissent_rate": round(avg_dissent, 2),
+                "match_score": round(score, 2)
+            })
+
+        return jsonify(results)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
