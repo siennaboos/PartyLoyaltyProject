@@ -28,40 +28,18 @@ def get_all_users_watchlists(userID):
     
     return response
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 @watchlists.route("/user/<int:userID>/watchlists", methods=['POST'])
 def add_user_to_watchlist(userID):
     current_app.logger.info('POST /user/<userID>/watchlists route entered')
 
     try:
         data = request.json
-<<<<<<< HEAD
-
-        required_fields = ["mepID"]
-        for field in required_fields:
-            if field not in data:
-                return jsonify({"error": f"Missing required field: {field}"}), 400
-
-        cursor = db.get_db().cursor()
-
-        query = """
-            INSERT INTO watchList (mepID, userID)
-            VALUES (%s, %s);
-        """
-
-        cursor.execute(query, (data['mepID'], userID))
-    
-=======
         if "mepID" not in data:
             return jsonify({"error": "Missing required field: mepID"}), 400
 
         cursor = db.get_db().cursor()
         query = "INSERT INTO watchList (mepID, userID) VALUES (%s, %s);"
         cursor.execute(query, (data['mepID'], userID))
->>>>>>> origin/main
         db.get_db().commit()
         cursor.close()
 
