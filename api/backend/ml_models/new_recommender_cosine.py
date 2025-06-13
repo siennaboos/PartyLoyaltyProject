@@ -30,14 +30,28 @@ def get_metrics(df, party_name, **kwargs):
         df_metrics (DataFrame): DataFrame of standardized metrics for recommender
     """
     
-    columns_to_decimals = ['percent_agree_current', 'percent_show_up', 'European People’s Party percentage', 'Renew Europe percentage',
-     'Progressive Alliance of Socialists and Democrats percentage',
-     'European Conservatives and Reformists percentage',
-     'Non-attached Members percentage',
-     'Europe of Sovereign Nations percentage',
-     'The Left in the European Parliament – GUE/NGL percentage',
-     'Greens/European Free Alliance percentage',
-     'Patriots for Europe percentage', 'Identity and Democracy percentage']
+    party_abbrev_dict = {
+   'European People’s Party': 'EPP',
+   'Renew Europe': 'RENEW',
+   'Progressive Alliance of Socialists and Democrats': 'SD',
+   'European Conservatives and Reformists': 'ECR',
+   'Non-attached Members': 'NI',
+   'Europe of Sovereign Nations': 'ESN',
+   'The Left in the European Parliament – GUE/NGL': 'GUE_NGL',
+   'Greens/European Free Alliance': 'GREEN_EFA',
+   'Patriots for Europe': 'PFE'
+}
+
+
+
+    columns_to_decimals = ['percent_agree_current', 'percent_show_up', 'EPP percentage', 'RENEW percentage',
+     'SD percentage',
+     'ECR percentage',
+     'NI percentage',
+     'ESN percentage',
+     'GUE_NGL percentage',
+     'GREEN_EFA percentage',
+     'PFE percentage']
     
     df[columns_to_decimals] = df[columns_to_decimals] / 100
 
@@ -106,15 +120,14 @@ def get_filters(percent_agree_current, percent_attendance, my_party, my_party_pe
 
     if 'new_candidate_party' in kwargs:
         
-        parties = {'party_European Conservatives and Reformists': [0], 
-               'party_European People’s Party': [0],
-               'party_Greens/European Free Alliance': [0],
-               'party_Identity and Democracy': [0],
-               'party_Non-attached Members': [0],
-               'party_Patriots for Europe': [0], 
-               'party_Progressive Alliance of Socialists and Democrats': [0],
-               'party_Renew Europe': [0],
-               'party_The Left in the European Parliament – GUE/NGL': [0]}
+        parties = {'party_ECR': [0], 
+               'party_EPP': [0],
+               'party_GREEN_EFA': [0],
+               'party_NI': [0],
+               'party_PFE': [0], 
+               'party_SD': [0],
+               'party_RENEW': [0],
+               'party_GUE_NGL': [0]}
     
         for key in parties:
             if key[key.index('_')+1:] == kwargs['new_candidate_party']:
@@ -182,15 +195,14 @@ def get_weights_vector(percent_agree_current_weight, percent_attendance_weight, 
 
     if 'new_candidate_party_weight' in kwargs:
         
-        parties = {'party_European Conservatives and Reformists': [0], 
-               'party_European People’s Party': [0],
-               'party_Greens/European Free Alliance': [0],
-               'party_Identity and Democracy': [0],
-               'party_Non-attached Members': [0],
-               'party_Patriots for Europe': [0], 
-               'party_Progressive Alliance of Socialists and Democrats': [0],
-               'party_Renew Europe': [0],
-               'party_The Left in the European Parliament – GUE/NGL': [0]}
+        parties = {'party_ECR': [0], 
+               'party_EPP': [0],
+               'party_GREEN_EFA': [0],
+               'party_NI': [0],
+               'party_PFE': [0], 
+               'party_SD': [0],
+               'party_RENEW': [0],
+               'party_GUE_NGL': [0]}
     
         for key in parties:
             if key[key.index('_')+1:] == kwargs['new_candidate_party_weight']:
