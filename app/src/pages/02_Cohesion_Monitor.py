@@ -1,5 +1,4 @@
 import streamlit as st
-<<<<<<< HEAD
 from streamlit_extras.app_logo import add_logo
 import pandas as pd
 from modules.nav import SideBarLinks
@@ -113,7 +112,6 @@ st.plotly_chart(fig, use_container_width=False)
 # --- Footer ---
 st.markdown("---")
 st.caption("Explore party cohesion trends across the EU Parliament — built by the Loyalty Lines data team 💡")
-=======
 import requests
 from modules.nav import SideBarLinks
 
@@ -214,4 +212,3 @@ if all_meps:
         add_to_watchlist(mep_options[selection])
 else:
     st.warning("⚠️ No MEPs available.")
->>>>>>> origin/main
