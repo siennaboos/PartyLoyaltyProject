@@ -43,12 +43,21 @@ VALUES (3, "Citizen");
 
 -- PREARE USER PERSONAS
 INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
+<<<<<<< HEAD
 VALUES ("59", "Greece", "Yanni", "Polous", 1, 3),
 ("45", "Germany", "Anna", "Schmidt", 2, 3),
 ("38", "France", "Jean", "Dubois", 3, 3),
 ("50", "Poland", "Marek", "Nowak", 4, 3),
 ("34", "Italy", "Luca", "Bianchi", 5, 3),
 ("29", "Ireland", "Siobhan", "Murphy", 6, 3);
+=======
+VALUES ("59", "Greece", "Yanni", "Polous", 1, 1),
+("45", "Germany", "Anna", "Schmidt", 2, 1),
+("38", "France", "Jean", "Dubois", 3, 1),
+("50", "Poland", "Marek", "Nowak", 4, 1),
+("34", "Italy", "Luca", "Bianchi", 5, 1),
+("29", "Ireland", "Siobhan", "Murphy", 6, 1);
+>>>>>>> origin/main
 
 
 INSERT INTO user (age, countryOfOrigin, firstName, lastName, userRoleID)
@@ -60,7 +69,11 @@ VALUES ("30", "Spain", "Camila", "Romero", 2),
 ("22", "Czech Republic", "Petr", "Novák", 2);
 
 INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
+<<<<<<< HEAD
 VALUES ("23", "Switzerland", "Greg", "Gerborg", 3, 1),
+=======
+VALUES ("23", "Switzerland", "Greg", "Gerborg", 3, 3),
+>>>>>>> origin/main
 ("60", "Hungary", "Ilona", "Toth", 2, 3),
 ("52", "Denmark", "Niels", "Christensen", 3, 3),
 ("47", "Slovakia", "Jana", "Kováčová", 1, 3),

@@ -10,7 +10,7 @@ meps = Blueprint("meps", __name__)
 def get_all_meps():
     current_app.logger.info('GET /meps route entered')
     query = '''
-        SELECT mepID, name, countryOfOrigin, loyaltyScore, partyID, recommendedPartyID, photoURL
+        SELECT mepID, name, countryOfOrigin, loyaltyScore, percentDisagree, percentTurnout, partyID, recommendedPartyID, photoURL
         FROM mep;
     '''
     cursor = db.get_db().cursor()
@@ -95,7 +95,10 @@ def get_mep_loyalty_score(mepID):
         cursor.close()
 
         if result:
+<<<<<<< HEAD
             # unpack tuple directly, no strings involved
+=======
+>>>>>>> origin/main
             agreed, dissented, not_voted = result
             return jsonify({
                 "agreed": float(agreed),
