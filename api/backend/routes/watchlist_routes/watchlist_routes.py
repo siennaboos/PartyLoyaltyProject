@@ -88,9 +88,9 @@ def get_all_meps():
     cursor = db.get_db().cursor(dictionary=True)
     query = "SELECT mepID, name FROM mep ORDER BY name"
     cursor.execute(query)
-    meps = cursor.fetchall()
+    result = cursor.fetchall()
     cursor.close()
-    return jsonify(meps), 200
+    return jsonify(result), 200
 
 @watchlists.route("/all_meps", methods=['GET'])
 def get_all_meps_for_dropdown():
@@ -114,3 +114,4 @@ def get_all_meps_for_dropdown():
     except Error as e:
         current_app.logger.error(f"Error fetching all MEPs: {e}")
         return jsonify({"error": str(e)}), 500
+    
