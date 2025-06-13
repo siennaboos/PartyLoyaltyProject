@@ -69,42 +69,45 @@ df = pd.DataFrame(data)
 
 
 
-weights = []
+# weights = []
 
 
-if 'weights_set' not in st.session_state:
-   st.session_state.weights_set = False
+# if 'weights_set' not in st.session_state:
+   # st.session_state.weights_set = False
 
 
-if st.button('Add Feature Importance Values', type='primary'):
-   st.session_state.weights_set = True
+# if st.button('Add Feature Importance Values', type='primary'):
+   # st.session_state.weights_set = True
 
 
-if st.session_state.weights_set:
-    st.write('#### Values must add up to 100!')
+# if st.session_state.weights_set:
+#     st.write('#### Values must add up to 100!')
 
 
-    agree_current_weight = st.slider("Current Party Alignment Importance (%)", 0, 100, 50)
-    weights.append(agree_current_weight)
-    attendance_weight = st.slider("Attendance Rate Importance (%)", 0, 100, 50)
-    weights.append(attendance_weight)
-    agree_new_weight = st.slider(f"{user_party} Alignment Weight (%)", 0, 100, 50)
-    weights.append(agree_new_weight)
+#     agree_current_weight = st.slider("Current Party Alignment Importance (%)", 0, 100, 50)
+#     weights.append(agree_current_weight)
+#     attendance_weight = st.slider("Attendance Rate Importance (%)", 0, 100, 50)
+#     weights.append(attendance_weight)
+#     agree_new_weight = st.slider(f"{user_party} Alignment Weight (%)", 0, 100, 50)
+#     weights.append(agree_new_weight)
 
 
-    if recruit_party != 'Not Specified':
-        party_weight = st.slider("Party Importance (%)", 0, 100, 50)
-        weights.append(party_weight)
+#     if recruit_party != 'Not Specified':
+#         party_weight = st.slider("Party Importance (%)", 0, 100, 50)
+#         weights.append(party_weight)
   
-    if recruit_country != 'Not Specified':
-        country_weight = st.slider("Country Importance (%)", 0, 100, 50)
-        weights.append(country_weight)
+#     if recruit_country != 'Not Specified':
+#         country_weight = st.slider("Country Importance (%)", 0, 100, 50)
+#         weights.append(country_weight)
 
-    if sum(weights) != 100:
-        st.warning('Feature Importance Values do not add up to 100')
-    else:
-        weights_str = str(weights).replace(" ", "")
-        weights_str = weights_str[:len(weights_str)-1]
+#     if sum(weights) != 100:
+#         st.warning('Feature Importance Values do not add up to 100')
+#     else:
+#         weights_str = str(weights).replace(" ", "")
+#         # weights_str = weights_str.strip("")
+#         st.write(weights_str)
+
+#         # weights_str = weights_str[:len(weights_str)]
 
 
 if st.button("Get Recommendations"):
@@ -116,8 +119,8 @@ if st.button("Get Recommendations"):
         params.append(f"new_candidate_party={recruit_party}")
     if recruit_country != 'Not Specified':
         params.append(f"new_candidate_country={recruit_country}")
-    if weights:
-        params.append(f"weights={weights_str}")
+    # if weights:
+        # params.append(f"weights={weights_str}")
 
 
     if params:
@@ -128,8 +131,11 @@ if st.button("Get Recommendations"):
 
 
     response = requests.get(full_url)
-
+    st.write(full_url)
 
     recruits = pd.DataFrame(response.json())
     recruits.rename(columns={f'{route_input_party} Alignment Rate': f'{user_party} Alignment Rate'}, inplace=True)
     st.dataframe(recruits.drop(columns=['mep_dot_product', 'mep_cosine']))   
+
+
+

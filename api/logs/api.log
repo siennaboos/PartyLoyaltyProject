@@ -1,6 +1,0 @@
-2025-06-13 08:54:10,731 INFO: GET /mep/<int:mepID>/party route entered [in /apicode/backend/routes/mep_routes/mep_routes.py:141]
-2025-06-13 08:54:10,736 INFO: GET /mep/<int:mepID>/party route success [in /apicode/backend/routes/mep_routes/mep_routes.py:154]
-2025-06-13 08:54:10,738 INFO: GET /mep/<int:mepID>/party route entered [in /apicode/backend/routes/mep_routes/mep_routes.py:141]
-2025-06-13 08:54:10,740 INFO: GET /mep/<int:mepID>/party route success [in /apicode/backend/routes/mep_routes/mep_routes.py:154]
-2025-06-13 08:54:10,741 INFO: GET /mep/<int:mepID>/party route entered [in /apicode/backend/routes/mep_routes/mep_routes.py:141]
-2025-06-13 08:54:10,744 INFO: GET /mep/<int:mepID>/party route success [in /apicode/backend/routes/mep_routes/mep_routes.py:154]
