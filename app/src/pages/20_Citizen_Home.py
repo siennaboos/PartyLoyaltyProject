@@ -14,12 +14,12 @@ st.write('')
 st.write('')
 st.write('### What would you like to do today?')
 
-if st.button('MEP & Political Party Information', 
+if st.button('MEP Information', 
              type='primary',
              use_container_width=True):
   st.switch_page('pages/21_MEP_Party_Info.py')
 
-if st.button('Country Explorer', 
+if st.button('MEP Match', 
              type='primary',
              use_container_width=True):
-  st.switch_page('pages/22_MEP_Match.py')
+  st.switch_page('pages/23_MEP_Match.py')

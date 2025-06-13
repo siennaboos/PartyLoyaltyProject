@@ -41,7 +41,7 @@ def PoliticalJournalistHomeNav():
 
 def CohesionMonitorNav():
     st.sidebar.page_link(
-        "pages/12_Party_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="🖥️"
+        "pages/12_Party_Cohesion_Monitor.py", label="Party Dissent Monitor", icon="🖥️"
 )
 
 def MEPComparisonNav():

@@ -61,6 +61,9 @@ def remove_from_watchlist(mep_id):
 
 # ---------- UI ----------
 
+st.title("📊 MEP Watchlist")
+st.markdown("Track dissent and alignment across EU parties with visual insights.")
+
 st.title("👀 Current Watchlist")
 watchlist = get_watchlist()
 
@@ -127,5 +130,3 @@ def get_watchList_data():
 
     return pd.DataFrame(rows)
 
-st.title("📊 MEP Watchlist")
-st.markdown("Track dissent and alignment across EU parties with visual insights.")

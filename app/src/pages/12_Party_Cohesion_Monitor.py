@@ -3,10 +3,11 @@ import requests
 from streamlit_extras.app_logo import add_logo
 from modules.nav import SideBarLinks
 import plotly.express as px
+import pandas as pd
 
 SideBarLinks()
 
-st.title("📈 Party Cohesion Monitor")
+st.title("📈 Party Dissent Monitor")
 st.markdown("### _Track how party loyalty has changed over time._")
 st.markdown("This vizualization shows how the percent of dissenters has changed for each party as time has passed.")
 st.markdown("Time is measured by week index, which refers to the week in which the vote occurred chronologically relative to other votes in the available data.")
@@ -15,7 +16,7 @@ st.markdown("The data in this graph is from 2021 - 2025. Week 1 is the least rec
 st.markdown(" ")
 st.markdown("_Click party names in the legend to add/remove them from the plot._")
 
-resp = requests.get("http://web-api:4000/t/time")
+resp = requests.get("http://web-api:4000/t/times")
 time_resp = resp.json() if resp.status_code == 200 else []
 
 # ----------------------------

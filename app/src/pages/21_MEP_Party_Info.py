@@ -89,4 +89,3 @@ st.plotly_chart(fig)
 # Footer
 st.markdown("---")
 st.caption("Explore party loyalty and voting behavior of MEPs across the European Parliament.")
->>>>>>> origin/main

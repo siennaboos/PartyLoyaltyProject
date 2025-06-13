@@ -53,7 +53,7 @@ input = {
     'procedures' : [procedure_dict[procedure] for procedure in selected_procedures]
 }
 
-logger.info(selected_procedures)
+# logger.info(selected_procedures)
 
 response = requests.post(f"http://web-api:4000/l/prediction", json=input)
 
