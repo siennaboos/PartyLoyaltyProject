@@ -41,7 +41,7 @@ def PoliticalJournalistHomeNav():
 
 def CohesionMonitorNav():
     st.sidebar.page_link(
-        "pages/12_Party_Cohesion_Monitor.py", label="Percent Dissent Predictor", icon="🖥️"
+        "pages/12_Party_Cohesion_Monitor.py", label="Dissent Overtime", icon="🖥️"
 )
 
 def MEPComparisonNav():
@@ -56,7 +56,7 @@ def MEPInfoNav():
 
 
 def MEPMatchNav():
-    st.sidebar.page_link("pages/23_MEP_Match.py", label="MEP Matcher", icon="👥")
+    st.sidebar.page_link("pages/22_Country_Match.py", label="Country Matcher", icon="🌍")
 
 
 
