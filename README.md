@@ -16,16 +16,16 @@ As a Citizen, a user can learn about individual MEPs and learn which countries h
 4. Navigate to http://localhost:8501/ to view the application!
 
 ## Using the application
-Users can act as different personas and explore the features for each one. To log in, select a user from the dropdown menu of your desired persona and click the log in button.
+All users can act as different personas and explore the features for each one. To log in, select a user from the dropdown menu of your desired persona and click the log in button.
 
 Then, you can navigate to the different pages of the application using the buttons that appear on your user homepage or by using the sidebar. To return to the main homepage, click logout at the bottom of the sidebar.
 
 ## Team Members and Major Contributions
 Alex Angione - data model (SQL DDL files, local and global ER diagrams) and API routes
 
-Sienna Boos - logistic regression model, dissent over time page
+Sienna Boos - logistic regression model, dissent over time page, country matching
 
-Trayna Bui - watchlist, citizen country matching page
+Trayna Bui - MEP watchlist and MEP comparion page
 
 Emily Moy - cosine similarity recommender model
 
