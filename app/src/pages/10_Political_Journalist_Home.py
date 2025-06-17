@@ -15,12 +15,13 @@ st.write('')
 st.write('')
 st.write('### What would you like to do today?')
 
-if st.button('MEP Party Loyalty Records', 
-             type='primary',
-             use_container_width=True):
-  st.switch_page('pages/11_MEP_Loyalty_Records.py')
-
 if st.button('Party Cohesion Monitor', 
              type='primary',
              use_container_width=True):
   st.switch_page('pages/12_Party_Cohesion_Monitor.py')
+
+
+if st.button('MEP Comparison', 
+             type='primary',
+             use_container_width=True):
+  st.switch_page('pages/13_MEP_Comparison.py')

@@ -6,8 +6,6 @@
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 import statsmodels.api as sm
@@ -131,18 +129,3 @@ def predict(party, procedure_type):
     # predict!
     prediction = 1 / (1 + np.exp(-np.dot(params_array, input_vector)))
     return prediction * 100
-
-#def main():
-    # df = get_data('time_series_data_final.csv')
-    # w = train(df)
-
-    # store w in the db - make it so that the 'predict' function takes that weight from the db
-    # and uses it to predict the percent dissent based on the inputted X array (which has
-    # len 2 - a party and procedure type)
-
-    # r2 = cross_validate(df)
-    # print(r2)
-    
-
-#if __name__ == "__main__":
- #   main()
