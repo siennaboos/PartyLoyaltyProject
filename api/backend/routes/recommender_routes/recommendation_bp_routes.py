@@ -122,7 +122,7 @@ def get_dissent_rate():
 @recommender_bp.route('/get-country-heatmap', methods=['GET'])
 def get_country_heatmap():
     try:
-        # Frontend to CSV mapping
+        # mapping from frontend names to csv names
         party_name_map = {
             "European People's Party": "European People’s Party",
             "Progressive Alliance of Socialists and Democrats": "Progressive Alliance of Socialists and Democrats",
@@ -134,22 +134,20 @@ def get_country_heatmap():
             "Non-Inscrits": "Non-attached Members"
         }
 
-        agree = float(request.args.get('agree'))
-        attendance = float(request.args.get('attendance'))
         party_display = request.args.get('party')
         party = party_name_map.get(party_display)
 
         if not party:
             return jsonify({'error': f"Unsupported party: {party_display}"}), 400
 
-        # Load data
+        # load csv
         csv_path = os.path.join(os.getcwd(), 'backend/ml_models/active_members.csv')
         df = pd.read_csv(csv_path)
 
-        # Filter to just this party
+        # filter to selected party only
         df_party = df[df["party"] == party].copy()
 
-        # EU ISO mappings
+        # country iso code mapping
         eu_countries = {
             'Austria': 'AUT', 'Belgium': 'BEL', 'Bulgaria': 'BGR', 'Croatia': 'HRV', 'Cyprus': 'CYP',
             'Czechia': 'CZE', 'Denmark': 'DNK', 'Estonia': 'EST', 'Finland': 'FIN', 'France': 'FRA',
@@ -172,13 +170,13 @@ def get_country_heatmap():
             if pd.isna(avg_dissent):
                 continue
 
-            score = (avg_dissent / (agree * 100 if agree > 0 else 1)) * (attendance * 100)
+            loyalty_score = 1 - (avg_dissent / 100)
 
             results.append({
                 "country": country,
                 "iso_alpha": iso,
                 "avg_dissent_rate": round(avg_dissent, 2),
-                "match_score": round(score, 2)
+                "match_score": round(loyalty_score * 100, 2)
             })
 
         return jsonify(results)
