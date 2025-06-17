@@ -23,7 +23,5 @@ def get_prediction():
         return jsonify({'prediction': round(result, 2)})
 
     except Exception as e:
-        print("Prediction error:", e)
         current_app.logger.error(f"Prediction error: {e}")
         return jsonify({'error': 'Prediction failed'}), 500
-

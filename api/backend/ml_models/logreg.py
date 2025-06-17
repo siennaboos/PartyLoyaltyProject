@@ -12,7 +12,7 @@ import statsmodels.api as sm
 
 from backend.db_connection import db
 import numpy as np
-# import logging
+import logging
 
 from flask import current_app
 
@@ -105,12 +105,13 @@ def predict(party, procedure_type):
     '''retrieve model parameters from the database and predict percent dissent
     based on the input party and procedure_type'''
     # load latest model weights from db
-    cursor = db.get_db().cursor(dictionary=True)
+    cursor = db.get_db().cursor()
     query = 'SELECT weight FROM regressionWeights ORDER BY weightId'
     cursor.execute(query)
 
     rows = cursor.fetchall()
-    params_array = np.array([row['weight'] for row in rows])
+
+    params_array = np.array([float(row['weight']) for row in rows])
 
     current_app.logger.info(f'Model weights: {params_array}')
 
@@ -121,10 +122,13 @@ def predict(party, procedure_type):
 
     feature_dict = {key: 0.0 for key in feature_order}
     feature_dict['intercept'] = 1.0
-    feature_dict[f'party_{party}'] = 1.0
-    feature_dict[f'procedure_type_{procedure_type}'] = 1.0
+    for p in party:
+        feature_dict[f'party_{p}'] = 1.0
+    for procedure in procedure_type:
+        feature_dict[f'procedure_type_{procedure}'] = 1.0
 
     input_vector = np.array([feature_dict[f] for f in feature_order])
+    print(input_vector)
 
     # predict!
     prediction = 1 / (1 + np.exp(-np.dot(params_array, input_vector)))

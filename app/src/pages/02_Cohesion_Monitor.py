@@ -57,8 +57,6 @@ input = {
 
 response = requests.post(f"http://web-api:4000/l/prediction", json=input)
 
-st.write(response.text)
-
 if response.status_code != 200:
     st.write("Could not make a prediction :(")
     st.stop()

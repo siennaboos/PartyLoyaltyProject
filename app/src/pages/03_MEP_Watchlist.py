@@ -62,7 +62,7 @@ def remove_from_watchlist(mep_id):
 # ---------- UI ----------
 
 st.title("📊 MEP Watchlist")
-st.markdown("Track dissent and alignment across EU parties with visual insights.")
+st.markdown("This is your personal MEP dashboard. Bookmark notable MEPs all in one place.")
 
 st.title("👀 Current Watchlist")
 watchlist = get_watchlist()
@@ -82,7 +82,7 @@ else:
                 st.markdown(f"### {mep.get('name', 'Unnamed MEP')}")
                 st.markdown(f"**🌍 Country**: {mep.get('countryOfOrigin', 'Unknown')}")
                 st.markdown(f"**📊 Loyalty Score**: {mep.get('loyaltyScore', '?')}")
-                st.markdown(f"**🏛️ Party ID**: {mep.get('partyID')} → Recommended: {mep.get('recommendedPartyID')}")
+                st.markdown(f"**🏛️ Party ID**: {mep.get('partyID')}")
                 if mep_id:
                     st.button(
                         "❌ Remove",
