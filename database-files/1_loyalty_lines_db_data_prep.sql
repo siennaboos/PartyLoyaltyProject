@@ -54,16 +54,16 @@ VALUES ("59", "Greece", "Yanni", "Polous", 1, 1),
 INSERT INTO user (age, countryOfOrigin, firstName, lastName, userRoleID)
 VALUES ("30", "Spain", "Camila", "Romero", 2),
 ("27", "Netherlands", "Eva", "Jansen", 2),
-("41", "Austria", "Karl", "Müller", 2),
+("41", "Austria", "Karl", "Muller", 2),
 ("36", "Portugal", "Ines", "Fernandes", 2),
 ("33", "Belgium", "Tom", "Lemoine", 2),
-("22", "Czech Republic", "Petr", "Novák", 2);
+("22", "Czech Republic", "Petr", "Novak", 2);
 
 INSERT INTO user (age, countryOfOrigin, firstName, lastName, partyID, userRoleID)
 VALUES ("23", "Switzerland", "Greg", "Gerborg", 3, 3),
 ("60", "Hungary", "Ilona", "Toth", 2, 3),
 ("52", "Denmark", "Niels", "Christensen", 3, 3),
-("47", "Slovakia", "Jana", "Kováčová", 1, 3),
+("47", "Slovakia", "Jana", "Kovacova", 1, 3),
 ("44", "Sweden", "Erik", "Svensson", 2, 3),
 ("39", "Romania", "Andrei", "Popescu", 3, 3);
 
