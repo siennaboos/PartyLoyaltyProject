@@ -17,7 +17,6 @@ PARTY_GROUPS = [
     "Greens/European Free Alliance",
     "The Left (GUE/NGL)",
     "European Conservatives and Reformists",
-    "Identity and Democracy",
     "Non-Inscrits"
 ]
 
